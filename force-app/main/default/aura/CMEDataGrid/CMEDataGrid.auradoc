@@ -1,0 +1,37 @@
+<aura:documentation>
+	<aura:description>
+        <h1>Consulting Maine Data Grid</h1>
+        <p>Full featured data grid with support for displaying, sorting, filtering, and selecting multiple types of data.</p>
+        <h2>Column Configuration</h2>
+        <table>
+            <tr><th>Property</th><th>Description</th></tr>
+            <tr><td>PropertyName</td><td>Name of property in the dataset to be output in this column</td></tr>
+            <tr><td>Type</td><td>Data Type. Valid values are: <ul><li>SObjectLink</li><li>Datetime</li><li>Currency</li><li>ActionGroup</li><li>ActionText</li><li>Checkbox</li></ul></td></tr>
+            <tr><td>IdField</td><td>Used with SObjectLink fields to identify the property to use as the ID to link to</td></tr>
+            <tr><td>Format</td><td>Object used with some Types to customize the output. Corresponds to properties of the underlying Lightning components.</td></tr>
+            <tr><th>CurrencyCode</th><th>Used with Currency fields to set the default currency code</th></tr>
+            <tr><th>CurrencyCodeField</th><th>Used with Currency fields to identify the property containing the currency code for the row</th></tr>
+            <tr><th>Filter</th><th>Set to true to enable filtering on the field. Currently, the grid only supports one filter field per grid</th></tr>
+            <tr><th>FilterOptions</th><th>Used with Filter option to initialize default list of filter values. When present, should always be set to []</th></tr>
+            <tr><th>ButtonClass</th><th>Used with ActionGroup to set a custom style on the buttons</th></tr>
+            <tr><th>CellClass</th><th>Used to set a custom style on the header (th) and cell (td)</th></tr>
+            <tr><th>ActionList</th><th>Defines list of buttons to display in the grid. A <strong>c:CMEDataGridActionFired</strong> event is fired when an action is triggered. Properties of each Action include: <ul><li>AlternativeText</li><li>ButtonClass</li><li>DisabledValidator: function to call for each row to evaluate whether the button should be disabled for that row. Must return an object of structure {Result: boolean, Message: string}</li><li>IconName: name of LDS icon to display</li><li>Label</li><li>Name: identifier included in the Action Fired event to indicate which action was triggered</li><li>Size: LDS size</li><li>Variant: LDS button variant</li></ul></th></tr>
+            <tr><th>ActionName</th><th>Used with type ActionText. A <strong>c:CMEDataGridActionFired</strong> event is fired when an action is triggered. Properties of the Action are: <ul><li>Label: text displayed on the button</li><li>Name: identifier included in the Action Fired event to indicate which action was triggered</li></ul></th></tr>
+            <tr><th>IncludeInTextFilter</th><th>Set to true to include the column in the global text filter</th></tr>
+            <tr><th>TrueLabel/FalseLabel</th><th>Used with the Checkbox type to customize the string values in the column filter</th></tr>
+        </table>
+        <h3>Example</h3>
+        <pre>
+var columns = [
+	{ Label: 'Account Email', PropertyName: 'Email', Type: 'SObjectLink', IdField: 'ContactId' },
+	{ Label: 'Product', PropertyName: 'Product', Type: 'ActionText', ActionName: 'ActionThree', Format: {Class:'customCSS', Title:'TitleText'}, IncludeInTextFilter: true },
+	{ Label: 'Quantity', PropertyName: 'Quantity' },
+	{ Label: 'Start Date', PropertyName: 'StartDate', Type: 'Datetime', Format: {Year:'numeric', Month:'numeric', Day:'numeric'}},
+	{ Label: 'Expiration Date', PropertyName: 'ExpirationDate', Type: 'Datetime' },
+	{ Label: 'Contract Amount', PropertyName: 'ContractAmount', Type: 'Currency', CurrencyCode: 'USD', CurrencyCodeField: 'CurrencyCode' },
+	{ Label: 'Status', PropertyName: 'Status', Filter: true, FilterOptions:[] },
+	{ Label: 'Actions', Class: 'button', Type: 'ActionGroup', ActionList: [{Label: 'One', Name: 'ActionOne'},{DisabledValidator: helper.createOppDisabled, IconName: 'utility:new', Variant: 'bare', AlternativeText: 'Add New Opportunity', Title: 'Add New Opportunity', Name: 'ActionTwo', ButtonClass: 'cme-addbutton', Size: 'large'}]}
+];
+        </pre>
+    </aura:description>
+</aura:documentation>

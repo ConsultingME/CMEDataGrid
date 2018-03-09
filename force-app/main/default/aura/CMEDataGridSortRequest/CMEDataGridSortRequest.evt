@@ -1,0 +1,4 @@
+<aura:event type="COMPONENT" description="Fired when a Sort operation is requested" >
+    <aura:attribute name="SortBy" type="String"/>
+    <aura:attribute name="SortAsc" type="Boolean" default="true"/>
+</aura:event>

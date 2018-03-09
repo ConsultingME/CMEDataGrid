@@ -1,0 +1,4 @@
+<aura:event type="COMPONENT" description="Fired on filtering event" >
+    <aura:attribute name="column" type="String"/>
+    <aura:attribute name="value" type="String"/>
+</aura:event>

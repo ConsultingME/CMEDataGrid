@@ -1,0 +1,49 @@
+<aura:component >
+
+    <aura:attribute name="config" type="Object"/>
+    <aura:attribute name="sortAsc" type="Boolean" default="false"/>
+    <aura:attribute name="sorted" type="Boolean" default="false" access="private"/>
+	<aura:attribute name="sortBy" type="String" />
+	<aura:attribute name="isFiltered" type="Boolean" default="false" access="private" />
+
+    <aura:registerEvent name="sortRequested" type="c:CMEDataGridSortRequest"/>
+    <aura:registerEvent name="filterRequested" type="c:CMEDataGridFilterRequest"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <aura:handler name="change" value="{!v.sortBy}" action="{!c.handleSortChanged}"/>
+
+    <th class="{!'slds-is-sortable slds-is-resizable slds-text-title--caps cme-datagrid-th ' + v.config.CellClass}" scope="col" style="{!if(and(v.config.Filter, v.config.Filter == true), '','')}">
+
+    	<div class="slds-grid">
+			<aura:if isTrue="{! !empty(v.config.Sortable) &amp;&amp; v.config.Sortable == false}">
+	            <span class="slds-truncate cme-datagrid-header-text" title="{!v.config.Label}">{!v.config.Label}</span>
+			<aura:set attribute="else">
+				<a onclick="{!c.doSort}" class="slds-truncate slds-th__action slds-text-link--reset" tabindex="0">
+					<span class="slds-assistive-text">Sort</span>
+					<span class="slds-truncate cme-datagrid-header-text" title="{!v.config.Label}">{!v.config.Label}</span>
+					<lightning:icon iconName="utility:arrowup" size="xx-small" class="{! if (or(not(v.sorted), not(v.sortAsc)), 'hidden')}"/>
+					<lightning:icon iconName="utility:arrowdown" size="xx-small" class="{! if (or(not(v.sorted), v.sortAsc), 'hidden')}" />
+					<span class="slds-assistive-text" aria-live="assertive" aria-atomic="true"></span>
+				</a>
+			</aura:set>
+			</aura:if>
+	        <aura:if isTrue="{!v.config.Filter &amp;&amp; v.config.Filter == true &amp;&amp; v.config.FilterLocation == 'column'}">
+	            <lightning:buttonMenu aura:id="filter" name="filter" onselect="{!c.doFilter}" iconName="utility:filterList" class="{! if(v.isFiltered,'cme-filterbutton cme-filterbuttonred', 'cme-filterbutton')}">
+	                <lightning:menuItem label="All" value="All"/>
+					
+					<aura:if isTrue="{!v.config.Type != 'Datetime' &amp;&amp; v.config.Type != 'Checkbox'}">
+						<aura:iteration items="{!v.config.FilterOptions}" var="opt">
+							<lightning:menuItem label="{!opt}" value="{!opt}"/>
+						</aura:iteration>
+					<aura:set attribute="else">
+						<aura:iteration items="{!v.config.FilterOptions}" var="opt">
+							<lightning:menuItem label="{!opt.label}" value="{!opt.value}"/>
+						</aura:iteration>
+					</aura:set>
+					</aura:if>
+	            </lightning:buttonMenu>
+	        </aura:if>
+        </div>
+    </th>
+	
+</aura:component>

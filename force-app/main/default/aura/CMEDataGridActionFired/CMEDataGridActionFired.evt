@@ -1,0 +1,4 @@
+<aura:event type="COMPONENT" description="Event firec when an action is triggered">
+    <aura:attribute name="Action" type="String"/>
+    <aura:attribute name="SelectedRow" type="Object"/>
+</aura:event>

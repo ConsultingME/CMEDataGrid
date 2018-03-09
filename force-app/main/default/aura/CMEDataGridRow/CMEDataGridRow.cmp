@@ -1,0 +1,22 @@
+<aura:component >
+	
+    <aura:attribute name="data" type="Object"/>
+    <aura:attribute name="selectAll" type="Boolean" />
+	<aura:attribute name="isSFOne" type="Boolean" default="false"/>
+
+    <aura:handler name="rowSelected" event="c:CMEDataGridRowSelected" action="{!c.handleRowSelected}"/>
+    <aura:handler name="ActionFired" event="c:CMEDataGridActionFired" action="{!c.actionFired}"/>
+
+
+    <tr aura:id="tablerow" class="{!if(v.data.cmeselected, 'slds-is-selected','')}" >
+                        
+        <aura:if isTrue="{!v.selectAll}">
+            <c:CMEDataGridCell selectAll="true" data="{!v.data}" isSFOne="{!v.isSFOne}" />
+        </aura:if>
+
+        <aura:iteration items="{!v.data.cmeoutputlist}" var="d">
+            <c:CMEDataGridCell data="{!d}" isSFOne="{!v.isSFOne}"/>
+        </aura:iteration>
+    </tr>
+
+</aura:component>

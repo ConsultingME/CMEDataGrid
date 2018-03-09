@@ -1,0 +1,107 @@
+.THIS {
+    
+}
+
+.THIS .hidden {
+	display: none;
+}
+
+.THIS .cme-pagesize .slds-form-element {
+	width: 200px;
+}
+
+.THIS .cme-pagesize .slds-form-element label {
+	font-size: .8125rem
+}
+
+.THIS .cme-pagesize label {
+	margin-top: 5px;
+}
+
+.THIS .cme-paging {
+	margin-top: 10px;
+}
+
+.THIS .cme-paging-buttons {
+	margin-right: 4px;
+}
+
+.THIS .pill-list {
+	padding: 0 .5rem .5rem .5rem;
+}
+
+.THIS .pill-list .slds-pill {
+	margin-left: 4px;
+}
+
+.THIS .slds-icon_container.slds-icon-standard-contact {
+	margin-right: 10px;
+}
+
+.THIS .client-icon {
+	background-color: #6bbd6e;
+}
+
+.THIS .cme-datagrid-container {
+    
+}
+
+.THIS .cme-datagrid-filter {
+    
+}
+
+.THIS .cme-datagrid-filter label {
+    display: none;
+}
+
+.THIS .cme-datagrid-filter-container {
+    padding: 0.75rem 0;
+}
+
+.THIS .cme-datagrid-filter-tagline {
+    font-size: 1rem;
+    font-weight: 300;
+    margin-left: 10px;
+}
+
+.THIS .cme-datagrid-header {
+    background-color: #EBEFF5;
+}
+
+.THIS .cme-datagrid-th {
+    line-height: initial;
+    padding: 0 !important;
+}
+
+.THIS .cme-datagrid-header-checkbox {
+    margin-right: 8px;
+}
+
+.THIS .cme-datagrid-hidden {
+    display: none !important;
+}
+
+.THIS .cme-datagrid-clientworking {
+    display: inline;
+}
+
+.THIS .cme-header-filters label {
+	display: none;
+}
+
+.THIS #cme-datagrid-clientworking {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    border: none;
+    background-color: rgba(255,255,255,0.5); /*dim the background*/
+}
+
+.THIS .cme-spinner {
+	position: absolute;
+    top: 50%;
+    bottom: 50%
+}

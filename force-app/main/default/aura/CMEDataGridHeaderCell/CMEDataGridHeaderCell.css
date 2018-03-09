@@ -1,0 +1,57 @@
+.THIS {
+	
+}
+
+.THIS .cme-datagrid-th {
+    padding: 0 !important;
+}
+
+.THIS .cme-datagrid-header-text {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.THIS button.slds-button.slds-button--icon-border {
+    visibility: visible;
+}
+
+.THIS .cme-filterbutton .slds-button {
+    border: none;
+}
+
+.THIS .cme-filterbuttonred button {
+	color: #EF6E64 !important;
+}
+
+.THIS .cme-filterbuttonred button span svg {
+	fill: #EF6E64 !important;
+}
+
+
+.THIS .cme-filterbuttonred button:hover {
+	color: #EF6E64 !important;
+}
+
+.THIS .cme-filterbuttonred button:focus {
+	color: #EF6E64 !important;
+}
+
+.THIS .cme-filterbuttonred button:active {
+	color: #EF6E64 !important;
+}
+
+.THIS .cme-filterbuttonred button:active span svg {
+	fill: #EF6E64 !important;
+}
+
+.THIS .cme-filterbuttonred button:hover span svg {
+	fill: #EF6E64 !important;
+}
+
+.THIS .cme-filterbuttonred button:focus span svg {
+	fill: #EF6E64 !important;
+}
+
+.THIS .hidden {
+    display: none;
+}

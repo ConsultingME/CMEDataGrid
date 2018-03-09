@@ -1,0 +1,3 @@
+<aura:event type="COMPONENT" description="Fired when one or more rows is selected or unselected.">
+    <aura:attribute name="SelectedRow" type="Object"/>
+</aura:event>

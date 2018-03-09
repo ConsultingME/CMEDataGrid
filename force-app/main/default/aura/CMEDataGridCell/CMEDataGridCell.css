@@ -1,0 +1,41 @@
+.THIS {
+}
+
+.THIS .cme-grid-checkbox {
+	
+}
+
+.THIS #erroricon {
+    float: right;
+    margin-top: -19px;
+    margin-right: -12px;
+}
+
+.THIS .cme-grid-checkbox .slds-form-element__label {
+    display: none !important;
+}
+
+.THIS .hidden {
+    display: none;
+}
+
+.THIS .cme-actionmenu {
+    margin: -4px 0;
+}
+
+.THIS .cme-actionmenu-item {
+	display: list-item;
+	margin-left: 0 !important;
+}
+
+/*
+.THIS .cme-grid-checkbox span.slds-checkbox label.slds-checkbox__label span.slds-checkbox--faux {
+    background-color: rgb(84, 105, 141);
+    border-color: rgb(84, 105, 141);
+}
+*/
+
+.THIS .cme-link {
+    color: blue;
+    cursor: pointer;
+}
