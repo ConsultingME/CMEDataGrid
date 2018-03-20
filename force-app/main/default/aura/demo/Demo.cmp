@@ -1,0 +1,16 @@
+<aura:component>
+
+	<aura:attribute name="datarows" type="List" />
+	<aura:attribute name="columns" type="List" />
+
+    <aura:handler name="init" value="{!this}" action="{!c.onInit}" />
+
+	<div class="slds">
+
+		<c:CMEDataGrid columns="{!v.columns}" datarows="{!v.datarows}"
+			sortBy="TotalPrice" sortAsc="false"
+		 />
+
+	</div>
+
+</aura:component>	
