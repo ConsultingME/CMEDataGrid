@@ -4,21 +4,60 @@
         <p>Full featured data grid with support for displaying, sorting, filtering, and selecting multiple types of data.</p>
         <h2>Column Configuration</h2>
         <table>
-            <tr><th>Property</th><th>Description</th></tr>
-            <tr><td>PropertyName</td><td>Name of property in the dataset to be output in this column</td></tr>
-            <tr><td>Type</td><td>Data Type. Valid values are: <ul><li>SObjectLink</li><li>Datetime</li><li>Currency</li><li>ActionGroup</li><li>ActionText</li><li>Checkbox</li></ul></td></tr>
-            <tr><td>IdField</td><td>Used with SObjectLink fields to identify the property to use as the ID to link to</td></tr>
-            <tr><td>Format</td><td>Object used with some Types to customize the output. Corresponds to properties of the underlying Lightning components.</td></tr>
-            <tr><th>CurrencyCode</th><th>Used with Currency fields to set the default currency code</th></tr>
-            <tr><th>CurrencyCodeField</th><th>Used with Currency fields to identify the property containing the currency code for the row</th></tr>
-            <tr><th>Filter</th><th>Set to true to enable filtering on the field. Currently, the grid only supports one filter field per grid</th></tr>
-            <tr><th>FilterOptions</th><th>Used with Filter option to initialize default list of filter values. When present, should always be set to []</th></tr>
-            <tr><th>ButtonClass</th><th>Used with ActionGroup to set a custom style on the buttons</th></tr>
-            <tr><th>CellClass</th><th>Used to set a custom style on the header (th) and cell (td)</th></tr>
-            <tr><th>ActionList</th><th>Defines list of buttons to display in the grid. A <strong>c:CMEDataGridActionFired</strong> event is fired when an action is triggered. Properties of each Action include: <ul><li>AlternativeText</li><li>ButtonClass</li><li>DisabledValidator: function to call for each row to evaluate whether the button should be disabled for that row. Must return an object of structure {Result: boolean, Message: string}</li><li>IconName: name of LDS icon to display</li><li>Label</li><li>Name: identifier included in the Action Fired event to indicate which action was triggered</li><li>Size: LDS size</li><li>Variant: LDS button variant</li></ul></th></tr>
-            <tr><th>ActionName</th><th>Used with type ActionText. A <strong>c:CMEDataGridActionFired</strong> event is fired when an action is triggered. Properties of the Action are: <ul><li>Label: text displayed on the button</li><li>Name: identifier included in the Action Fired event to indicate which action was triggered</li></ul></th></tr>
-            <tr><th>IncludeInTextFilter</th><th>Set to true to include the column in the global text filter</th></tr>
-            <tr><th>TrueLabel/FalseLabel</th><th>Used with the Checkbox type to customize the string values in the column filter</th></tr>
+            <tr><th>Property</th><td>Description</td></tr>
+            <tr><th>PropertyName</th><td>Name of property in the dataset to be output in this column</td></tr>
+            <tr><th>Label</th><td>Text displayed in the column header</td></tr>
+            <tr><th>Type</th><td>Data Type. Valid values are: 
+                <ul>
+                    <li>ActionGroup</li>
+                    <li>ActionMenu</li>
+                    <li>ActionText</li>
+                    <li>BooleanIcon</li>
+                    <li>Checkbox</li>
+                    <li>Currency</li>
+                    <li>Datetime</li>
+                    <li>Number</li>
+                    <li>SObjectLink</li>
+                </ul>
+            </td></tr>
+            <tr><th>IdField</th><td>Used with SObjectLink fields to identify the property to use as the ID to link to</td></tr>
+            <tr><th>Format</th><td>Object used with some Types to customize the output. Corresponds to properties of the underlying Lightning components.</td></tr>
+            <tr><th>TrueIcon/FalseIcon</th><td>Used with the BooleanIcon type to configure the icons. Properties correspond to attributes on lightning:icon:
+                <ul>
+                    <li>AlternativeText</li>
+                    <li>ButtonClass</li>
+                    <li>IconName</li>
+                    <li>Size</li>
+                    <li>Title</li>
+                    <li>Variant</li>
+                </ul>
+            </td></tr>
+            <tr><th>CurrencyCode</th><td>Used with Currency fields to set the default currency code</td></tr>
+            <tr><th>CurrencyCodeField</th><td>Used with Currency fields to identify the property containing the currency code for the row</td></tr>
+            <tr><th>Filter</th><td>Set to true to enable filtering on the field.</td></tr>
+            <tr><th>FilterLocation</th><td>By default, filters render as a dropdown in the COLUMN header. To render filter as a dropdown in the GRID header, set this to "header".</td></tr>
+            <tr><th>FilterOptions</th><td>Used with Filter option to initialize default list of filter values. When present, should always be set to []</td></tr>
+            <tr><th>DefaultLabel/TrueLabel/FalseLabel</th><td>Used with the Checkbox type to customize the string values in the column filter</td></tr>
+            <tr><th>IncludeInTextFilter</th><td>Set to true to include the column in the global text filter</td></tr>
+            <tr><th>ButtonClass</th><td>Used with ActionGroup to set a custom style on the buttons</td></tr>
+            <tr><th>CellClass</th><td>Used to set a custom style on the header (th) and cell (td)</td></tr>
+            <tr><th>ActionText</th><td>A single action rendered as a hyperlink</td></tr>
+            <tr><th>ActionName</th><td>Used with type ActionText. A <strong>c:CMEDataGridActionFired</strong> event is fired when an action is triggered. Properties of the Action are: <ul><li>Label: text displayed on the button</li><li>Name: identifier included in the Action Fired event to indicate which action was triggered</li></ul></td></tr>
+            <tr><th>ActionList</th><td>Defines list of actions to display in the grid. A <strong>c:CMEDataGridActionFired</strong> event is fired when an action is triggered. Properties of each Action include: 
+                <ul>
+                    <li>AlternativeText</li>
+                    <li>ButtonClass</li>
+                    <li>DisabledValidator: function to call for each row to evaluate whether the button should be disabled for that row. Must return an object of structure {Result: boolean, Message: string}</li>
+                    <li>IconName: name of LDS icon to display</li>
+                    <li>Label</li>
+                    <li>Name: identifier included in the Action Fired event to indicate which action was triggered</li>
+                    <li>Size: LDS size</li>
+                    <li>Variant: LDS button variant</li>
+                </ul>
+            </td></tr>
+            <tr><th>ActionMenu</th><td>Defines list of actions to display in a dropdown menu. Events and properties are same as on ActionGroup</td></tr>
+            <tr><th>MenuAlignment</th><td>Used with ActionMenu to determine the alignment of the menu relative to the button. Corresponds to menuAlignment attribute of lightning:buttonMenu</td></tr>
+            <tr><th>Sortable</th><td>Disable sorting on the column by setting to false</td></tr>
         </table>
         <h3>Example</h3>
         <pre>
