@@ -1,16 +1,27 @@
-<aura:component>
+<aura:component >
 
 	<aura:attribute name="datarows" type="List" />
 	<aura:attribute name="columns" type="List" />
 
     <aura:handler name="init" value="{!this}" action="{!c.onInit}" />
+    <aura:handler name="ActionFired" event="c:CMEDataGridActionFired" action="{!c.onGridAction}"/>
 
 	<div class="slds">
 
 		<c:CMEDataGrid columns="{!v.columns}" datarows="{!v.datarows}"
 			sortBy="TotalPrice" sortAsc="false"
+			aura:id="grid" selectAll="true"
+			primaryKey="Id"
 		 />
+
+		<lightning:select aura:id="actions" label="Actions" onchange="{!c.onActionSelected}" class="actionSelect">
+			<option value="">Select One</option>
+			<option value="ApprovedAction">Act on Approved Rows</option>
+			<option value="Archive">Archive Incomplete Records</option>
+		</lightning:select>
+
+		<lightning:button label="Fire Custom Action" onclick="{!c.onCustomAction}" />
 
 	</div>
 
-</aura:component>	
+</aura:component>

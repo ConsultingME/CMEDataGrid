@@ -1,2 +1,7 @@
-.THIS {
+.THIS .green {
+    color: green;
+}
+
+.THIS .actionSelect {
+    width: 200px;
 }
