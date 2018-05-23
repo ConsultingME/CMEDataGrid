@@ -17,6 +17,8 @@
     <aura:attribute name="filterByTextLocation" type="String" default="center" description="Used to determine the location of the search input. Options include center and right."/>
 	<aura:attribute name="filterText" type="String" description="current valid filter text" access="private"/>
 
+    <aura:attribute name="filterLocationSet" type="Boolean" default="{! v.filterByTextLocation eq 'center' || v.filterByTextLocation eq 'centeronly' || v.filterByTextLocation eq 'left' || v.filterByTextLocation eq 'right'}" access="private"/>
+
 	<aura:attribute name="displayIcon" type="Boolean" default="true" description="Indicates if an icon should be displayed in the header."/>
 
     <aura:attribute name="filterIconName" type="String" description="define the icon using SLDS icon section and name" default="standard:connected_apps"/>
@@ -90,29 +92,40 @@
 							</div>
 						</div>
 	                </div>
+                </aura:if>
 
-					<!-- TODO: make this explicitly "right", add explicit "left" and make "center" the default -->
-	                <aura:set attribute="else">
-	                	<div class="{! 'cme-datagrid-filter-container' + ' ' + v.filterContainerClass}">
-		                    <div class="slds-grid slds-grid--vertical-align-center">
-		                    	<aura:if isTrue="{!v.displayIcon}">
-			                    	<div>
-										<lightning:icon iconName="{!v.filterIconName}" size="medium" />
-									</div>
-								</aura:if>
-								<div class="slds-grid cme-header-filters">
-									<aura:iteration items="{!v.filterHeaderList}" var="filter">
-										<c:CMEDataGridHeaderFilter filter="{!filter}"/>
-									</aura:iteration>
-									{!v.rightHeaderContent}
-								</div>
-								<div class="slds-col_bump-left">
-									<lightning:input aura:id="filterText" type="search" label="Filter" name="filterText" onchange="{!c.onFilterByTextChange}" placeholder="{!v.filterPlaceHolder}" class="cme-datagrid-filter"/>
-								</div>
-							</div>
-		                </div>
-	                </aura:set>
+                <aura:if isTrue="{! v.filterByTextLocation == 'centeronly'}">
+             
+                    <div class="{! 'cme-datagrid-filter-container' + ' ' + v.filterContainerClass}">
+                        <lightning:layout horizontalAlign="center">
+                            <lightning:layoutItem flexibility="grow" size="8">
+                                <lightning:input aura:id="filterText" type="search" label="Filter" name="filterText" onchange="{!c.onFilterByTextChange}" placeholder="{!v.filterPlaceHolder}" class="cme-datagrid-filter"/>
+                                <lightning:spinner aura:id="filterSpinner" class="cme-datagrid-hidden"/>
+                            </lightning:layoutItem>
 
+                        </lightning:layout>
+                    </div>
+                </aura:if>
+
+                <aura:if isTrue="{!v.filterLocationSet eq false}">
+                    <div class="{! 'cme-datagrid-filter-container' + ' ' + v.filterContainerClass}">
+                        <div class="slds-grid slds-grid--vertical-align-center">
+                            <aura:if isTrue="{!v.displayIcon}">
+                                <div>
+                                    <lightning:icon iconName="{!v.filterIconName}" size="medium" />
+                                </div>
+                            </aura:if>
+                            <div class="slds-grid cme-header-filters">
+                                <aura:iteration items="{!v.filterHeaderList}" var="filter">
+                                    <c:CMEDataGridHeaderFilter filter="{!filter}"/>
+                                </aura:iteration>
+                                {!v.rightHeaderContent}
+                            </div>
+                            <div class="slds-col_bump-left">
+                                <lightning:input aura:id="filterText" type="search" label="Filter" name="filterText" onchange="{!c.onFilterByTextChange}" placeholder="{!v.filterPlaceHolder}" class="cme-datagrid-filter"/>
+                            </div>
+                        </div>
+                    </div>
                 </aura:if>
                 
             </aura:if>
