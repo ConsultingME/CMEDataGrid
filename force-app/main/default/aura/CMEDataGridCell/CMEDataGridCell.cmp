@@ -112,7 +112,7 @@
             <aura:if isTrue="{!v.data.config.Type == 'BooleanIcon'}">
 				<aura:if isTrue="{!v.data.value == true}">
 					<lightning:icon alternativeText="{!v.data.config.TrueIcon.AlternativeText}"
-						class="{!'slds-button ' + v.data.config.TrueIcon.ButtonClass}"
+						class="{!v.data.config.TrueIcon.ButtonClass}"
 						iconName="{!v.data.config.TrueIcon.IconName}"
 						size="{!v.data.config.TrueIcon.Size}"
 						title="{!v.data.config.TrueIcon.Title}"
@@ -120,7 +120,7 @@
 					/>
 				<aura:set attribute="else">
 					<lightning:icon alternativeText="{!v.data.config.FalseIcon.AlternativeText}"
-						class="{!'slds-button ' + v.data.config.FalseIcon.ButtonClass}"
+						class="{!v.data.config.FalseIcon.ButtonClass}"
 						iconName="{!v.data.config.FalseIcon.IconName}"
 						size="{!v.data.config.FalseIcon.Size}"
 						title="{!v.data.config.FalseIcon.Title}"
