@@ -15,7 +15,9 @@
         </aura:if>
 
         <aura:iteration items="{!v.data.cmeoutputlist}" var="d">
-            <c:CMEDataGridCell data="{!d}" isSFOne="{!v.isSFOne}"/>
+			<aura:if isTrue="{!d.visible}">
+				<c:CMEDataGridCell data="{!d}" isSFOne="{!v.isSFOne}"/>
+			</aura:if>
         </aura:iteration>
     </tr>
 

@@ -53,7 +53,7 @@
 	datarowsChanged: function(component, event, helper) {
 		//console.log('datarowschanged');
 		var datarows = component.get("v.datarows");
-		var internaldatarows = [];
+		var internaldatarows = [], internalcolumns = [];
 		var columns = component.get("v.columns");
 		var selectAll = component.get("v.selectAll");
 		var selectable = (null == component.get("v.primaryKey") || component.get("v.selectAllDefault") ===  true);
@@ -61,7 +61,7 @@
 		datarows.map(function (dr) {
 			var newdr = {datarow: dr, cmeid: q, cmeselected: false, cmeoutputlist: [], rowstatus: {Selectable: selectable, Error: ''}};
 			columns.forEach(function (c) {
-				var cmeoutput = {config: c, value: dr[c.PropertyName]};
+				var cmeoutput = {config: c, value: dr[c.PropertyName], visible: !(!$A.util.isEmpty(c.Visible) && (c.Visible === false))};
 				if (c.Type) {
 					switch (c.Type) {
 						case 'Datetime' :
@@ -76,7 +76,7 @@
 							cmeoutput.value = {RecordId: dr[c.IdField], Text: dr[c.PropertyName]};
 							break;
 						case 'Currency' :
-							cmeoutput.value = {Amount: dr[c.PropertyName], CurrencyCode: (dr[c.CurrencyCodeField] && null != dr[c.CurrencyCodeField]) ? dr[c.CurrencyCodeField] : c.CurrencyCode};
+							cmeoutput.value = {Amount: dr[c.PropertyName] || '', CurrencyCode: (dr[c.CurrencyCodeField] && null != dr[c.CurrencyCodeField]) ? dr[c.CurrencyCodeField] : c.CurrencyCode};
 							break;
 						case 'ActionGroup' :
 						case 'ActionMenu' :
@@ -99,69 +99,123 @@
 			//console.log(internaldatarows);
 
 		var fo = [],  g=0;
+
 		var ff = function(dr) {
 					//console.log(dr[q]);
 					var v = dr.cmeoutputlist[g].value;
-					if (dr.cmeoutputlist[g].config.Type === 'Checkbox' && dr.cmeoutputlist[g].config.TrueLabel) {
-						var label = v === true ? dr.cmeoutputlist[g].config.TrueLabel : dr.cmeoutputlist[g].config.FalseLabel;
+					if (!$A.util.isEmpty(v)) {
+						if (!v.map) {
+							generateFilterOptions(v);
+							//if (dr.cmeoutputlist[g].config.Type === 'Checkbox' && dr.cmeoutputlist[g].config.TrueLabel) {
+							//	var label = v === true ? dr.cmeoutputlist[g].config.TrueLabel : dr.cmeoutputlist[g].config.FalseLabel;
+							//	var opt = fo.filter(function (o) {
+							//		return o.label == label;
+							//	});
+							//	if (opt.length == 0) {
+							//		v = {label: label, value: v};
+							//		fo.push(v);
+							//	}
+							//	return;
+							//}
+							//if (dr.cmeoutputlist[g].config.Type === 'SObjectLink') {
+							//	v = v.Text;
+							//}
+							//if (dr.cmeoutputlist[g].config.Type === 'Datetime') {
+							//	if (v) {
+							//		var label = v.toLocaleString(undefined, dateConfig);
+							//		if (-1 === rawDates.indexOf(label)) {
+							//			v = {label: label, value: v, UTCvalue: v.toUTCString()};
+							//			fo.push(v);
+							//			rawDates.push(label);
+							//		}
+							//		return;
+							//	}
+							//}
+							//if (v && -1 === fo.indexOf(v)) {
+							//	fo.push(v);
+							//}
+
+						} else {
+							v.map(function(v) { 
+								generateFilterOptions(v);
+							});
+						}
+					}
+
+					function generateFilterOptions(v) {
+						if ((dr.cmeoutputlist[g].config.Type === 'Checkbox' || dr.cmeoutputlist[g].config.Type === 'BooleanIcon') && dr.cmeoutputlist[g].config.TrueLabel) {
+							var label = v === true ? dr.cmeoutputlist[g].config.TrueLabel : dr.cmeoutputlist[g].config.FalseLabel;
+							var opt = fo.filter(function (o) {
+								return o.label == label;
+							});
+							if (opt.length == 0) {
+								v = {label: label, value: v};
+								fo.push(v);
+							}
+							return;
+						}
+						if (dr.cmeoutputlist[g].config.Type === 'Currency') {
+							v = (v.Amount) ? v.Amount.toLocaleString(undefined, {style: 'currency', currency: v.CurrencyCode}) : '';
+						}
+						if (dr.cmeoutputlist[g].config.Type === 'SObjectLink') {
+							v = v.Text;
+						}
+						if (dr.cmeoutputlist[g].config.Type === 'Datetime') {
+							if (v) {
+								var label = v.toLocaleString(undefined, dateConfig);
+								if (-1 === rawDates.indexOf(label)) {
+									v = {label: label, value: v.toUTCString(), sortValue: v};
+									fo.push(v);
+									rawDates.push(label);
+								}
+								return;
+							}
+						}
 						var opt = fo.filter(function (o) {
-							return o.label == label;
+							return o.label == v;
 						});
 						if (opt.length == 0) {
-							v = {label: label, value: v};
+							v = {label: v, value: v};
 							fo.push(v);
 						}
 						return;
 					}
-					if (dr.cmeoutputlist[g].config.Type === 'SObjectLink') {
-						v = v.Text;
-					}
-					if (dr.cmeoutputlist[g].config.Type === 'Datetime') {
-						if (v) {
-							var label = v.toLocaleString(undefined, dateConfig);
-							if (-1 === rawDates.indexOf(label)) {
-								v = {label: label, value: v, UTCvalue: v.toUTCString()};
-								fo.push(v);
-								rawDates.push(label);
-							}
-							return;
-						}
-					}
-					if (v && -1 === fo.indexOf(v)) 
-						fo.push(v);
 				};
 
 		var textFiltering = component.get("v.filterByText");
 		var filterColumnsIndexList = component.get("v.filterColumnsIndexList");
-		var filterHeaderList = [];
+		var filterHeaderList = {visible: [], other: [], get length() { return this.visible.length + this.other.length; }};
+		const fl = component.get("v.p_filterlist");
 		for(g=0; g < columns.length; g++) {
+			if (!(!$A.util.isEmpty(columns[g].Visible) && (columns[g].Visible === false))) {
+				internalcolumns.push(columns[g]);
+			}
 			if (columns[g].Filter && true === columns[g].Filter) {
 				var config = columns[g];
 				var dateConfig = null, rawDates = [];
 				var isDate = false;
 				if (config.Type && config.Type != null && config.Type === 'Datetime') {
 					isDate = true;
-					dateConfig =	{ 
-										year: config.Format.Year, month: config.Format.Month, day: config.Format.Day
-										, hour: config.Format.Hour, hour12: config.Format.Hour12, minute: config.Format.Minute, second: config.Format.Second
-										, weekday: config.Format.Weekday
-										, timeZone: config.Format.TimeZone, timeZoneName: config.Format.TimeZoneName
-									};
+					dateConfig = this.getDateConfig(config);
 				}
 				fo = [];
 				internaldatarows.map(ff);
 				if (config.Type && config.Type === 'Number') {
 					fo.sort(function compareNumbers(a, b) {
-						var x = $A.util.isEmpty(a) === false ? a : Number.NEGATIVE_INFINITY;
-						var y = $A.util.isEmpty(b) === false ? b : Number.NEGATIVE_INFINITY;
+						var x = $A.util.isEmpty(a.value) === false ? a.value : Number.NEGATIVE_INFINITY;
+						var y = $A.util.isEmpty(b.value) === false ? b.value : Number.NEGATIVE_INFINITY;
 						return x - y;
 					});
 				} else if (isDate === false) {
-					fo.sort();
+					fo.sort(function compareNumbers(a, b) {
+						var x = a.label;
+						var y = b.label;
+						return x - y;
+					});
 				} else {
 					fo.sort(function (a, b) {
-						var x = $A.util.isEmpty(a.value) === false ? a.value : new Date(0);
-						var y = $A.util.isEmpty(b.value) === false ? b.value : new Date(0);
+						var x = $A.util.isEmpty(a.sortValue) === false ? a.sortValue : new Date(0);
+						var y = $A.util.isEmpty(b.sortValue) === false ? b.sortValue : new Date(0);
 						if (x > y)
 							return 1;
 						if (x < y)
@@ -173,7 +227,16 @@
 					switch (columns[g].FilterLocation) {
 						case 'header' :
 							//var dl = (columns[g].DefaultLabel) ? columns[g].DefaultLabel : 'All';
-							filterHeaderList.push({Name: columns[g].PropertyName, Type: columns[g].Type, FilterOptions: fo, DefaultLabel: columns[g].DefaultLabel});
+							const type = columns[g].Type || 'Text';
+							var sv = [];
+							fl.map(function(f) { if (f.field === columns[g].PropertyName) if (!f.value.map) sv.push(f.value); else sv = f.value;})
+							const f = {Name: columns[g].PropertyName, Type: type, FilterOptions: fo, DefaultLabel: columns[g].DefaultLabel, Multiple: columns[g].FilterMultiple, SelectedValues: sv};
+							const defaultFilters = component.get("v.filterHeadersDefault");
+							if ($A.util.isEmpty(defaultFilters) || defaultFilters.indexOf(f.Name) != -1) {
+								filterHeaderList.visible.push(f);
+							} else {
+								filterHeaderList.other.push(f);
+							}
 							break;
 						default: 
 							columns[g].FilterLocation = 'column';
@@ -202,7 +265,7 @@
 
 		//console.log(columns);
 		//console.log(internaldatarows);
-		component.set("v.internalcolumns", columns);
+		component.set("v.internalcolumns", internalcolumns);
 		component.set("v.internaldatarows", internaldatarows);
 	},
 
@@ -268,36 +331,113 @@
 	filter: function(component, helper) {
 		//console.log('filter');
 		//console.log(component.get("v.filterlist"));
-		var fl = component.get("v.filterlist");
+
+		const self = this;
+
+		var fl = component.get("v.p_filterlist");
 		var rows = component.get("v.internaldatarows");
 		var filterColumnsIndexList = null;
+
+		var config = component.get("v.columns");
+		var pills = [];
 		//console.log(rows.length);
 		if (fl.length > 0) {
 			fl.map(function(f) {
 				switch (f.type) {
 					case "Col" :
+						if (component.get("v.displayFilterPills")) {
+							const column = config.filter(function(c) { return c.PropertyName === f.field; })[0];
+							if (f.isExternal === undefined || f.isExternal === false) {
+								if (!f.value.map) {
+									getFilterPill(f.field, f.value, f.value, column);
+								} else {
+									f.value.map(function(fv) {
+										getFilterPill(f.field, fv, fv, column);
+									});
+								}
+
+								function getFilterPill(field, label, value, column) {
+									var filterPillData = {field: field, label: label, value: value, icon: column.FilterPillIcon};
+									if (column.Type === 'Checkbox' || column.Type === 'BooleanIcon') {
+										filterPillData.label = (value == true || value == 'true') ? column.TrueLabel || true : column.FalseLabel || false;
+									} else if (column.Type === 'SObjectLink') {
+									} else if (column.Type === 'Datetime') {
+										filterPillData.label = value.toLocaleString(undefined, self.getDateConfig(column));
+									} else if (column.Type === 'Number') {
+									} else if (column.Type === 'Currency') {
+										//return !($A.util.isEmpty(datavalue) || $A.util.isEmpty(datavalue.Amount)) ?  ((datavalue.Amount.toLocaleString) ? datavalue.Amount.toLocaleString(undefined, {style: 'currency', currency: datavalue.CurrencyCode}) : '') === filtervalue : false;
+									}
+
+									pills.push({
+										type: ($A.util.isEmpty(filterPillData.icon)) ? null : 'icon',
+										label: filterPillData.label,
+										iconName: filterPillData.icon,
+										alternativeText: filterPillData.label,
+										name: filterPillData.field + '|' + filterPillData.value
+									});
+								}
+							}
+						}
+
 						rows = rows.filter(function(idr) {
 								for(var q=0; q < idr.cmeoutputlist.length; q++) {
 									var d = idr.cmeoutputlist[q];
-									if (f.field === d.config.PropertyName) {
-										if (d.config.Type === 'Checkbox') {	// && d.config.TrueLabel
-											//d.value ? d.config.TrueLabel : d.config.FalseLabel;
-											//return v === f.value;
-											return d.value.toString() === f.value.toString();
-										} else if (d.config.Type === 'SObjectLink') {
-											return d.value.Text === f.value;
-										} else if (d.config.Type === 'Datetime') {
-											return (d.value) ?  d.value.toUTCString() === ((f.value.toUTCString) ? f.value.toUTCString() : f.value) : false;
-										} else if (d.config.Type === 'Number') {
-											return (d.value) ?  Number(d.value) === Number(f.value) : false;
+									if (!$A.util.isEmpty(d.value) && f.field === d.config.PropertyName) {
+										//TODO: optimize?
+										if (!d.value.map) {
+											if (!f.value.map) {
+												return testValue(d.config, d.value, f.value);
+											} else {
+												for (var y = 0; y < f.value.length; y++) {
+													if (testValue(d.config, d.value, f.value[y])) {
+														return true;
+													}
+												}
+											}
 										} else {
-											return d.value === f.value;
+											for (var x = 0; x < d.value.length; x++) {
+												if (!f.value.map) {
+													if (testValue(d.config, d.value[x], f.value)) {
+														return true;
+													}
+												} else {
+													for (var y = 0; y < f.value.length; y++) {
+														if (testValue(d.config, d.value[x], f.value[y])) {
+															return true;
+														}
+													}
+												}
+											}
 										}
 									} 
 								}
 								return false;
+
+								function testValue(config, datavalue, filtervalue) {
+									if (config.Type === 'Checkbox' || config.Type === 'BooleanIcon') {	// && d.config.TrueLabel
+										//d.value ? d.config.TrueLabel : d.config.FalseLabel;
+										//return v === f.value;
+										//filterPillData = {icon: config.FilterPillIcon, label: filtervalue == true ? config.TrueLabel || true : config.FalseLabel || false};
+										return datavalue.toString() === filtervalue.toString();
+									} else if (config.Type === 'SObjectLink') {
+										return datavalue.Text === filtervalue;
+									} else if (config.Type === 'Datetime') {
+										//filterPillData = {icon: config.FilterPillIcon, label: filtervalue.toLocaleString(undefined, self.getDateConfig(config))};
+										return (datavalue) ?  datavalue.toUTCString() === ((filtervalue.toUTCString) ? filtervalue.toUTCString() : filtervalue) : false;
+									} else if (config.Type === 'Number') {
+										return (datavalue) ?  Number(datavalue) === Number(filtervalue) : false;
+									} else if (config.Type === 'Currency') {
+										return !($A.util.isEmpty(datavalue) || $A.util.isEmpty(datavalue.Amount)) ?  ((datavalue.Amount.toLocaleString) ? datavalue.Amount.toLocaleString(undefined, {style: 'currency', currency: datavalue.CurrencyCode}) : '') === filtervalue : false;
+									} else {
+										return datavalue === filtervalue;
+									}
+								}
 							});
+
+							component.set("v.filterPills", pills);
+						
 						break;
+
 					case "Text" :
 						rows = rows.filter(function(idr) {
 							if (null === filterColumnsIndexList) {
@@ -320,9 +460,12 @@
 						break;
 				}
 			});
+		} else {
+			component.set("v.filterPills", []);
 		}
 		//console.log(rows);
 		try { component.set("v.displayedrows", rows); } catch(exc) {/*buttonIcon sometimes throws an exception when being destroyed so just eat it */}
+
 		helper.toggleFilterSpinner(component, component.get("v.spinnerId"), false);
 	},
 /*
@@ -388,19 +531,31 @@
 		helper.toggleFilterSpinner(component, "cme-datagrid-clientworking", false);
 	},
 */
+	processExternalFilter: function(component, filterOptions) {
+		filterOptions.map(function(f) { f.isExternal = true; });
+		this.processFilter(component, filterOptions);
+	},
+
 	processFilter: function(component, filterOptions) {
-		var fl = component.get("v.filterlist");
-		for (var x = 0; x < fl.length; x++) {
-			if (fl[x].field === filterOptions.column) {
-				fl.splice(x, 1);
-				break;
+		var fl = component.get("v.p_filterlist");
+		if (filterOptions.map === undefined) {
+			filterOptions = [filterOptions];
+		}
+
+		filterOptions.map(function(fo) {
+			for (var x = 0; x < fl.length; x++) {
+				if (fl[x].field === fo.column) {
+					fl.splice(x, 1);
+					break;
+				}
 			}
-		}
-		if ("All" !== filterOptions.value) {
-			fl.push({type: 'Col', field: filterOptions.column, value: filterOptions.value});
-		}
+			//if ("All" !== filterOptions.value || !(filterOptions.value.length && filterOptions.value.length !== 0)) {
+			if ((fo.value.map !== undefined) ? fo.value.length !== 0 : "All" !== fo.value) {
+				fl.push({type: 'Col', field: fo.column, value: fo.value, isExternal: fo.isExternal});
+			}
+		});
 		//console.log(fl);
-		component.set("v.filterlist", fl);
+		component.set("v.p_filterlist", fl);
 	},
 
 	updateSelectable: function(component, event, handler) {
@@ -481,5 +636,14 @@
 		const isSFOne = !$A.util.isEmpty($A.get("e.force:navigateToSObject"));
 		console.log('isSFOne: ' + isSFOne);
 		component.set("v.isSFOne", isSFOne);
+	},
+
+	getDateConfig: function(config) {
+		return { 
+					year: config.Format.Year, month: config.Format.Month, day: config.Format.Day
+					, hour: config.Format.Hour, hour12: config.Format.Hour12, minute: config.Format.Minute, second: config.Format.Second
+					, weekday: config.Format.Weekday
+					, timeZone: config.Format.TimeZone, timeZoneName: config.Format.TimeZoneName
+				};
 	}
 })

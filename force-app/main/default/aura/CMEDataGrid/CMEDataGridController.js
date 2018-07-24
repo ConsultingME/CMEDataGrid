@@ -1,6 +1,10 @@
 ({
 	onInit: function (component, event, helper) {
 		helper.detectContainer(component);
+		const fl = component.get("v.filterList");
+		if (!$A.util.isEmpty(fl)) {
+			helper.processExternalFilter(component, fl);
+		}
 	},
 
 	handleSortRequest: function (component, event, helper) {
@@ -51,7 +55,7 @@
 			//window.setTimeout($A.getCallback(function() {
 			//	helper.filterByText(component, helper, filterValue);
 			//}), 0);
-			var fl = component.get("v.filterlist");
+			var fl = component.get("v.p_filterlist");
 			for (var x = 0; x < fl.length; x++) {
 				if (fl[x].type === 'Text') {
 					fl.splice(x, 1);
@@ -61,7 +65,7 @@
 			if (filterValue.length > 1) {
 				fl.push({type: 'Text', field: null, value: filterValue});
 			}
-			component.set("v.filterlist", fl);
+			component.set("v.p_filterlist", fl);
 		}
 	},
 
@@ -93,6 +97,11 @@
 		window.setTimeout($A.getCallback(function() {
 			helper.filter(component, helper);
 		}), 0);
+	},
+
+	onExternalFilterListChanged: function (component, event, helper) {
+		const fl = component.get("v.filterList");
+		helper.processExternalFilter(component, fl);
 	},
 
 	onDisplayedRowsChanged: function (component, event, helper) {
@@ -133,5 +142,9 @@
 	onPageSizeChanged: function (component, event, helper) {
 		//component.set("v.pageSize", component.find("pageSizeSelect").get("v.value"));
 		helper.initPaging(component);
+	},
+
+	onFilterToggleClick: function (component, event, helper) {
+		component.set("v.filtersOpen", !component.get("v.filtersOpen"));		
 	}
 })

@@ -31,16 +31,9 @@
 	            <lightning:buttonMenu aura:id="filter" name="filter" onselect="{!c.doFilter}" iconName="utility:filterList" class="{! if(v.isFiltered,'cme-filterbutton cme-filterbuttonred', 'cme-filterbutton')}">
 	                <lightning:menuItem label="All" value="All"/>
 					
-					<aura:if isTrue="{!v.config.Type != 'Datetime' &amp;&amp; v.config.Type != 'Checkbox'}">
-						<aura:iteration items="{!v.config.FilterOptions}" var="opt">
-							<lightning:menuItem label="{!opt}" value="{!opt}"/>
-						</aura:iteration>
-					<aura:set attribute="else">
-						<aura:iteration items="{!v.config.FilterOptions}" var="opt">
-							<lightning:menuItem label="{!opt.label}" value="{!opt.value}"/>
-						</aura:iteration>
-					</aura:set>
-					</aura:if>
+					<aura:iteration items="{!v.config.FilterOptions}" var="opt">
+						<lightning:menuItem label="{!opt.label}" value="{!opt.value}"/>
+					</aura:iteration>
 	            </lightning:buttonMenu>
 	        </aura:if>
         </div>

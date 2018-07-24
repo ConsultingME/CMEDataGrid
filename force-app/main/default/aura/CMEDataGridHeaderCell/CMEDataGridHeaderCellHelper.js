@@ -28,8 +28,16 @@
 		var filterRequest = component.getEvent("filterRequested");
 		var filterValue = event.detail.menuItem.get("v.value");
 
+		var config = component.get("v.config");
+		if (filterValue !== 'All' && config.Type === 'Datetime') {
+			var fo = config.FilterOptions.filter(function(fo) {
+				return fo.value === filterValue;
+			});
+			filterValue = fo[0].sortValue;
+		}
+
 		filterRequest.setParams({
-			column: component.get("v.config").PropertyName,
+			column: config.PropertyName,
 			value: filterValue
 		});
 		var filter = component.find("filter");
