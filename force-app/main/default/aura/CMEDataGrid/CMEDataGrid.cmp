@@ -14,6 +14,7 @@
 	<aura:attribute name="pageSizeOptions" type="List" default="[10, 25, 50, 100]" description="Set options for Page Size"/>
 	<aura:attribute name="displayIcon" type="Boolean" default="true" description="Indicates if an icon should be displayed in the header."/>
 	<aura:attribute name="displayFilterPills" type="Boolean" default="false" description="Indicates if filter criteria should be displayed as a list of pills in the header."/>
+	<aura:attribute name="sfOneAppDetectEvent" type="String" default="e.force:createRecord" description="Name of SF One event to use to detect if running in one.app"/>
 
     <aura:attribute name="columnSizeLeft" type="Integer" default="0" />
     <aura:attribute name="columnSizeMiddle" type="Integer" default="12" />
@@ -25,6 +26,8 @@
 
     <aura:attribute name="accordionFilterLabel" type="String" default="Filters" />
     <aura:attribute name="accordionFilterOtherLabel" type="String" default="Other Filters" />
+    <aura:attribute name="accordionLeftContentLabel" type="String" default="Left Content" />
+
     
     <aura:attribute name="filterByText" type="Boolean" default="false" description="Set to true to enable filtering by text. Use IncludeInTextFilter column setting to specify which columns to use in filtering"/>
     <aura:attribute name="filterByTextLocation" type="String" default="center" description="Used to determine the location of the search input. Options include center and right."/>
@@ -43,13 +46,19 @@
     <aura:attribute name="rightHeaderContent" type="Aura.Component[]"/>
     <aura:attribute name="leftMidHeaderContent" type="Aura.Component[]"/>
     <aura:attribute name="filterCriteria" type="Aura.Component[]"/>
-    
-    <aura:attribute name="internaldatarows" type="List" access="private"/>
-	<aura:attribute name="displayedrows" type="List" access="private"/>
-	<aura:attribute name="pagedrows" type="List" access="private"/>
-	<aura:attribute name="pages" type="List" access="private"/>
+
+    <aura:attribute name="showRefreshButton" type="Boolean" default="false" /> 
+    <aura:attribute name="showLeftPanelButton" type="Boolean" default="false" />
+    <aura:attribute name="showNotSelectableIcon" type="Boolean" default="true" />
+
 	<aura:attribute name="currentpage" type="Integer" default="0" />
 	<aura:attribute name="movetopage" type="Integer" default="0" />
+
+    <aura:attribute name="internaldatarows" type="List" access="private"/>
+	<aura:attribute name="displayedrows" type="List" access="private"/>
+	<aura:attribute name="pagedrows" type="List" default="[]" access="private"/>
+	<aura:attribute name="pages" type="List" access="private"/>
+	<aura:attribute name="finalIndex" type="Integer" default="{! add((v.pageSize * v.currentpage), (v.pagedrows.length || v.pageSize))}" access="private" />
 	<aura:attribute name="internalcolumns" type="List" access="private"/>
 	<aura:attribute name="p_filterlist" type="List" access="private"/>
 	<aura:attribute name="filterColumnsIndexList" type="List" access="private"/>
@@ -57,7 +66,7 @@
     <aura:attribute name="filterLocationSet" type="Boolean" default="{! v.filterByTextLocation eq 'center' || v.filterByTextLocation eq 'centeronly' || v.filterByTextLocation eq 'left' || v.filterByTextLocation eq 'right'}" access="private"/>
     <aura:attribute name="filterPills" type="List" access="private"/>
 	<aura:attribute name="spinnerId" type="String" default="{!globalId + 'cme-datagrid-clientworking'}" access="private"/>
-	<aura:attribute name="filterHeaderList" type="Object" access="private"/>
+	<aura:attribute name="filterHeaderList" type="Map" default="{visible: [], other: []}" access="private"/>
 	<aura:attribute name="isSFOne" type="Boolean" default="false" access="private"/>
 
     <aura:method name="updateSelectable" action="{!c.updateSelectable}" description="Call to update whether rows can be selected">
@@ -65,6 +74,7 @@
     </aura:method>
 
     <aura:registerEvent name="rowSelected" type="c:CMEDataGridRowSelected"/>
+    <aura:registerEvent name="refreshView" type="force:refreshView"/>
 
     <aura:handler name="init" value="{!this}" action="{!c.onInit}" />
     <aura:handler name="change" value="{!v.datarows}" action="{!c.datarowsChanged}"/>
@@ -77,6 +87,7 @@
     <aura:handler name="sortRequested" event="c:CMEDataGridSortRequest" action="{!c.handleSortRequest}" description="Used internally when a sort action is requested"/>
     <aura:handler name="rowSelected" event="c:CMEDataGridRowSelected" action="{!c.handleRowSelected}" description="Used internally when a row is selected"/>
     <aura:handler name="filterRequested" event="c:CMEDataGridFilterRequest" action="{!c.handleFilterRequest}" description="Used internally when a filter action is requested"/>
+    <aura:handler name="ActionFired" event="c:CMEDataGridActionFired" action="{!c.actionFired}"/>
 
     <div class="cme-datagrid">
 
@@ -84,46 +95,56 @@
 
             	{!v.filterCriteria}
 
-				<aura:if isTrue="{!v.displayFilterPills}">
-					<lightning:layout>
-						<lightning:layoutItem size="12" class="{! if(v.filterPills.length gt 0, 'slds-m-bottom_small', 'hidden')}">
-							<lightning:pillContainer items="{!v.filterPills}" class="slds-m-bottom_x-small"></lightning:pillContainer>
-						</lightning:layoutItem>
-						<lightning:layoutItem size="12" class="{! if(v.filterPills.length eq 0, 'slds-m-bottom_small', 'hidden')}">
-							No filters applied
-						</lightning:layoutItem>
-					</lightning:layout>
-				</aura:if>
-
                 <lightning:layout>
+                    <lightning:layoutItem aura:id="leftPanel" size="{!v.columnSizeLeft}" padding="{!v.columnPaddingLeft}" class="{! if(v.columnSizeLeft == 0, 'slds-hide','leftPanel')}" >
 
-                    <lightning:layoutItem size="{!v.columnSizeLeft}" padding="{!v.columnPaddingLeft}" class="{! if(v.columnSizeLeft == 0, 'hidden','')}">
-
-                        <lightning:accordion activeSectionName="A" >
-                            <lightning:accordionSection name="A" label="{!v.accordionFilterLabel}">
-                                <aura:iteration items="{!v.filterHeaderList.visible}" var="filter">
-                                    <div class="slds-m-bottom_xx-small">
-                                        <c:CMEDataGridHeaderFilter filter="{!filter}" multiple="{!filter.Multiple}" selectedFilters="{!filter.SelectedValues}"/>
+                        <aura:if isTrue="{!v.displayFilterPills}">
+                            <lightning:layout>
+                                <lightning:layoutItem size="12" class="{! if(v.filterPills.length gt 0, '', 'slds-hide')}">
+                                    <lightning:pillContainer items="{!v.filterPills}" class="filter-pillContainer" onitemremove="{!c.onFilterPillRemove}" ></lightning:pillContainer> 
+                                </lightning:layoutItem>
+                                <lightning:layoutItem size="12" class="{! if(v.filterPills.length eq 0, '', 'slds-hide')}">  
+                                    <div class="slds-box slds-box_x-small nofilters-box">
+                                        <p>No filters have been applied</p>
                                     </div>
-                                </aura:iteration>
-                            </lightning:accordionSection>
-                            <lightning:accordionSection name="B" label="{!v.accordionFilterOtherLabel}">
-                                <div class="{! if(v.filterHeaderList.other.length eq 0, 'hidden', '')}">
+                                </lightning:layoutItem>
+                            </lightning:layout>
+                            <hr />
+                        </aura:if>
+
+                        <lightning:accordion >
+                            
+                            <div class="{! if(v.filterHeaderList.visible.length eq 0, 'slds-hide', '')}">
+                                <lightning:accordionSection name="A" label="{!v.accordionFilterLabel}">
+                                    <aura:iteration items="{!v.filterHeaderList.visible}" var="filter">
+                                        <div class="slds-m-bottom_xx-small">
+                                            <c:CMEDataGridHeaderFilter filter="{!filter}" multiple="{!filter.Multiple}" selectedFilters="{!filter.SelectedValues}"/>
+                                        </div>
+                                    </aura:iteration>
+                                </lightning:accordionSection>
+                            </div>
+
+                            <div class="{! if(v.filterHeaderList.other.length eq 0, 'slds-hide', '')}">
+                                <lightning:accordionSection name="B" label="{!v.accordionFilterOtherLabel}">
                                     <aura:iteration items="{!v.filterHeaderList.other}" var="filter">
                                         <div class="slds-m-bottom_xx-small">
                                             <c:CMEDataGridHeaderFilter filter="{!filter}" multiple="{!filter.Multiple}" selectedFilters="{!filter.SelectedValues}"/>
                                         </div>
                                     </aura:iteration>
-                                </div>
-                            </lightning:accordionSection>
-                            
-                        </lightning:accordion>
+                                </lightning:accordionSection>
+                            </div>
 
-                        {!v.leftContent}
+                            <div class="{! if(empty(v.leftContent),'slds-hide','')}">
+                                <lightning:accordionSection name="C" label="{!v.accordionLeftContentLabel}">
+                                    {!v.leftContent}
+                                </lightning:accordionSection>
+                            </div>
+
+                        </lightning:accordion>
 
                     </lightning:layoutItem>
 
-                    <lightning:layoutItem size="{!v.columnSizeMiddle}"  padding="{!v.columnPaddingMiddle}">
+                    <lightning:layoutItem size="{!v.columnSizeMiddle}" padding="{!v.columnPaddingMiddle}" flexibility="grow">
 
                         <aura:if isTrue="{!v.filterByText}">
 
@@ -148,9 +169,9 @@
                                             <aura:iteration items="{!v.filterHeaderList.visible}" var="filter">
                                                 <c:CMEDataGridHeaderFilter filter="{!filter}" multiple="{!filter.Multiple}" selectedFilters="{!filter.SelectedValues}"/>
                                             </aura:iteration>
-                                            <div class="{! if(v.filterHeaderList.other.length eq 0, 'hidden', '')}">
+                                            <div class="{! if(v.filterHeaderList.other.length eq 0, 'slds-hide', '')}">
                                                 <span onclick="{!c.onFilterToggleClick}">Other Filters:</span>
-                                                <div class="{! if(!v.filtersOpen, 'hidden', '')}">
+                                                <div class="{! if(!v.filtersOpen, 'slds-hide', '')}">
                                                     <aura:iteration items="{!v.filterHeaderList.other}" var="filter">
                                                         <c:CMEDataGridHeaderFilter filter="{!filter}" multiple="{!filter.Multiple}" selectedFilters="{!filter.SelectedValues}"/>
                                                     </aura:iteration>
@@ -180,10 +201,24 @@
                                 <div class="{! 'cme-datagrid-filter-container' + ' ' + v.filterContainerClass}">
                                     <lightning:layout horizontalAlign="spread">
                                         <lightning:layoutItem >
-                                            <lightning:input aura:id="filterText" type="search" label="Filter" name="filterText" onchange="{!c.onFilterByTextChange}" placeholder="{!v.filterPlaceHolder}" class="cme-datagrid-filter"/>
-                                            <lightning:spinner aura:id="filterSpinner" class="cme-datagrid-hidden"/>
+                                            <lightning:layout>
+                                                <aura:if isTrue="{!v.showLeftPanelButton}">
+                                                    <lightning:layoutItem>
+                                                        <lightning:buttonIcon aura:id="leftPanelButton" iconName="utility:chevronleft"  alternativeText="Slide Filters" class="slds-m-right_xx-small" onclick="{!c.toggleLeftPanel}"/>
+                                                    </lightning:layoutItem>
+                                                </aura:if>
+                                                <aura:if isTrue="{!v.showRefreshButton}">
+                                                    <lightning:layoutItem>
+                                                        <lightning:buttonIcon iconName="utility:rotate"  alternativeText="Refresh Grid" class="slds-m-right_x-small" onclick="{!c.onRefreshClick}"/>
+                                                    </lightning:layoutItem>
+                                                </aura:if>
+                                                <lightning:layoutItem>
+                                                    <lightning:input aura:id="filterText" type="search" label="Filter" name="filterText" onchange="{!c.onFilterByTextChange}" placeholder="{!v.filterPlaceHolder}" class="cme-datagrid-filter"/>
+                                                    <lightning:spinner aura:id="filterSpinner" class="cme-datagrid-hidden"/>
+                                                </lightning:layoutItem>
+                                            </lightning:layout>
                                         </lightning:layoutItem>
-                                        <lightning:layoutItem >
+                                        <lightning:layoutItem > 
                                             {!v.rightHeaderContent}
                                         </lightning:layoutItem>
 
@@ -203,9 +238,9 @@
                                             <aura:iteration items="{!v.filterHeaderList.visible}" var="filter">
                                                 <c:CMEDataGridHeaderFilter filter="{!filter}"/>
                                             </aura:iteration>
-                                            <div class="{! if(v.filterHeaderList.other.length eq 0, 'hidden', '')}">
+                                            <div class="{! if(v.filterHeaderList.other.length eq 0, 'slds-hide', '')}">
                                                 <span onclick="{!c.onFilterToggleClick}">Other Filters:</span>
-                                                <div class="{! if(!v.filtersOpen, 'hidden', '')}">
+                                                <div class="{! if(!v.filtersOpen, 'slds-hide', '')}">
                                                     <aura:iteration items="{!v.filterHeaderList.other}" var="filter">
                                                         <c:CMEDataGridHeaderFilter filter="{!filter}"/>
                                                     </aura:iteration>
@@ -242,13 +277,13 @@
                                         </th>
                                     </aura:if>
                                     <aura:iteration items="{!v.internalcolumns}" var="col">
-                                        <c:CMEDataGridHeaderCell config="{!col}" sortBy="{!v.sortBy}" sortAsc="{!v.sortAsc}"/>
+                                        <c:CMEDataGridHeaderCell config="{!col}" sortBy="{!v.sortBy}" sortAsc="{!v.sortAsc}" isFiltered="{!col.isFiltered}"/>
                                     </aura:iteration>
                                 </tr>
                             </thead>
                             <tbody id="datatablebody" aura:id="datatablebody">
                                 <aura:iteration items="{!v.pagedrows}" var="dr">
-                                    <c:CMEDataGridRow data="{!dr}" selectAll="{!v.selectAll}" isSFOne="{!v.isSFOne}"/>
+                                    <c:CMEDataGridRow aura:id="row" data="{!dr}" selectAll="{!v.selectAll}" isSFOne="{!v.isSFOne}" showNotSelectableIcon="{!v.showNotSelectableIcon}"/>
                                 </aura:iteration>
                             </tbody>
                         </table>
@@ -281,14 +316,14 @@
                                 <lightning:button onclick="{!c.onLastPage}" disabled="{! v.currentpage == v.pages.length-1}" class="cme-paging-buttons">&gt;&gt;</lightning:button>
                             </div>
                             <div class="slds-p-horizontal_medium">
-                                Showing {! (v.pageSize * v.currentpage)+1} to {! (v.pageSize * v.currentpage) + v.pagedrows.length} of {!v.displayedrows.length} entries
+                                Showing {! (v.pageSize * v.currentpage)+1} to {!if(v.finalIndex gt v.displayedrows.length, v.displayedrows.length, v.finalIndex)} of {!v.displayedrows.length} entries
                             </div>
                         </div>
 
                         <!-- Paging Controls End -->
                     </lightning:layoutItem>
 
-                    <lightning:layoutItem size="{!v.columnSizeRight}"  padding="{!v.columnPaddingRight}" class="{! if(v.columnSizeRight == 0, 'hidden','')}">
+                    <lightning:layoutItem size="{!v.columnSizeRight}"  padding="{!v.columnPaddingRight}" class="{! if(v.columnSizeRight == 0, 'slds-hide','')}">
                         {!v.rightContent}
                     </lightning:layoutItem>
 

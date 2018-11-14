@@ -1,0 +1,14 @@
+<aura:component extends="c:CMEDataGridCellActionBase" implements="c:CMEDataGridCellInterface">
+
+	<aura:attribute name="actionList" type="Aura.Component[]" access="private" />
+
+	<aura:method name="resetToggleActions" action="{!c.onResetToggleActions}" />
+
+	<aura:handler name="init" value="{!this}" action="{!c.onInit}" /> 
+
+	<td role="gridcell" class="{!v.data.config.CellClass}">
+
+		{!v.actionList}
+
+	</td>
+</aura:component>

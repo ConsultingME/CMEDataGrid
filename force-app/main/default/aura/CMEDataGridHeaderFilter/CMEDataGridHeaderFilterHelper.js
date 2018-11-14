@@ -34,8 +34,9 @@
 
 		var selectedValues = component.get("v.selectedFilters");
 		for(var x=0; x<selectedValues.length; x++) {
-			if (!Number.isNaN(selectedValues[x])) {
-				selectedValues[x] = Number(selectedValues[x]);
+			const num = Number(selectedValues[x]);
+			if (!Number.isNaN(num)) {
+				selectedValues[x] = num;
 			}
 		}
 		component.set("v.selectedFilters", selectedValues);

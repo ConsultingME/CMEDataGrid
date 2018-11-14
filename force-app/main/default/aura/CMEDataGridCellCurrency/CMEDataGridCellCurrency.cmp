@@ -1,0 +1,9 @@
+<aura:component implements="c:CMEDataGridCellInterface">
+        <td role="gridcell" class="{!'slds-truncate ' + v.data.config.CellClass}">
+            <div class="slds-truncate" title="{!v.data.value.Amount}">
+				<ui:outputCurrency value="{!v.data.value.Amount}" currencyCode="{!v.data.value.CurrencyCode}"
+                                class="{!v.data.config.Format.Class}" format="{!v.data.config.Format.Format}"
+                                />
+			</div>
+		</td>
+</aura:component>

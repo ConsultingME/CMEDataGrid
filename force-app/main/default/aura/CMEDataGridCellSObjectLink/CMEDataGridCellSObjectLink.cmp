@@ -1,0 +1,16 @@
+<aura:component implements="c:CMEDataGridCellInterface">
+
+	<aura:attribute name="url" type="String" access="private" />
+
+	<aura:handler name="init" value="{!this}" action="{!c.onInit}" /> 
+
+	<lightning:navigation aura:id="navService"/>
+
+    <td role="gridcell" class="{!'slds-truncate ' + v.data.config.CellClass}">
+		<ui:outputURL value="{!v.url}" label="{!v.data.value.Text}" target="{!v.data.config.Format.Target}"
+					alt="{!v.data.config.Format.Alt}" class="{!v.data.config.Format.Class}" disabled="{!v.data.config.Format.Disabled}" 
+					iconClass="{!v.data.config.Format.IconClass}" title="{!if(empty(v.data.config.Format.Title), v.data.value.Text, v.data.config.Format.Title)}"
+					/>
+	</td >
+
+</aura:component>	

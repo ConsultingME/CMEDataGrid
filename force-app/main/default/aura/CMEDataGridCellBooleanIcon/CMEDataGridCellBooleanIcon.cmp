@@ -1,0 +1,22 @@
+<aura:component implements="c:CMEDataGridCellInterface">
+
+	<aura:attribute name="altText" type="String" access="private" />
+	<aura:attribute name="class" type="String" access="private" />
+	<aura:attribute name="iconName" type="String" access="private" />
+	<aura:attribute name="size" type="String" access="private" />
+	<aura:attribute name="title" type="String" access="private" />
+	<aura:attribute name="variant" type="String" access="private" />
+
+	<aura:handler name="init" value="{!this}" action="{!c.onInit}" /> 
+
+    <td role="gridcell" class="{!'slds-truncate ' + v.data.config.CellClass}">
+
+		<lightning:icon alternativeText="{!v.altText}"
+			class="{!v.class}"
+			iconName="{!v.iconName}"
+			size="{!v.size}"
+			title="{!v.title}"
+			variant="{!v.variant}"
+		/>
+	</td>
+</aura:component>

@@ -2,8 +2,17 @@
     
 }
 
-.THIS .hidden {
-	display: none;
+.THIS .leftPanel {
+    transition: margin-left 1s; 
+    transition-timing-function: ease-out;
+}
+
+.THIS .slideLeftPanel {
+    margin-left: -16.6666666667%;
+}
+
+.THIS .flipButtonImage svg {
+    transform: rotate(180deg)
 }
 
 .THIS .cme-pagesize .slds-form-element {
@@ -43,7 +52,7 @@
 }
 
 .THIS .cme-datagrid-container {
-    
+    overflow: hidden;
 }
 
 .THIS .cme-datagrid-filter {
@@ -56,6 +65,7 @@
 
 .THIS .cme-datagrid-filter-container {
     padding: 0 0 0.5rem 0;
+    margin-top: 2px;
 }
 
 .THIS .cme-datagrid-filter-tagline {
@@ -101,7 +111,29 @@
 }
 
 .THIS .cme-spinner {
-	position: absolute;
+	position: fixed;
     top: 50%;
     bottom: 50%
+}
+
+.THIS .nofilters-box {
+    border: none;
+    background-color: transparent;
+}
+
+.THIS .nofilters-box p {
+    opacity: 0.30;
+}
+
+.THIS .filter-pillContainer {
+    border: none;
+    background-color: transparent;
+}
+
+.THIS .filter-pillContainer ul {
+    display: block;
+}
+
+.THIS .filter-pillContainer li {
+    padding: 0 0 .25rem .25rem
 }

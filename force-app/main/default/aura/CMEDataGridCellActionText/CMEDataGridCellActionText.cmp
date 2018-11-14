@@ -1,0 +1,9 @@
+<aura:component extends="c:CMEDataGridCellActionBase" implements="c:CMEDataGridCellInterface">
+                
+	<td role="gridcell" class="{!'slds-truncate ' + v.data.config.CellClass}">
+		<a  class="{!'slds-truncate ' + v.data.config.Format.Class}" 
+			title="{!if(empty(v.data.config.Format.Title), v.data.value, v.data.config.Format.Title)}" 
+			onclick="{!c.fireActionText}">{!v.data.value}</a>
+	</td>
+
+</aura:component>

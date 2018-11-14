@@ -1,0 +1,25 @@
+<aura:component implements="c:CMEDataGridCellInterface">
+
+    <aura:registerEvent name="rowSelected" type="c:CMEDataGridRowSelected"/>
+    <aura:attribute name="showNotSelectableIcon" type="Boolean" default="true" />
+
+	<td class="slds-text-align--right" role="gridcell" style="width: 3.25rem; z-index: 100;">
+		<lightning:input type="checkbox" 
+							label="Select" 
+							name="{!join('-','cme-datagrid',globalid,'checkbox')}" 
+							checked="{!v.data.cmeselected}" 
+							onchange="{!c.handleSelectClicked}"
+							class="cme-grid-checkbox"
+							disabled="{! !v.data.rowstatus.Selectable}"
+							title="{!v.data.rowstatus.Error}"					
+		/>
+
+		<aura:if isTrue="{!v.showNotSelectableIcon}">
+			<span id="erroricon" title="{!v.data.rowstatus.Error}" class="{!if(null == v.data.rowstatus.Error || 0 == v.data.rowstatus.Error.length, 'slds-hide')}">
+				<lightning:icon iconName="utility:error" variant="error" size="x-small"/>
+			</span>
+		</aura:if>
+
+	</td >
+
+</aura:component>

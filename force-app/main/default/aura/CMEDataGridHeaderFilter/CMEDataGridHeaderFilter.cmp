@@ -2,15 +2,13 @@
  
 	<aura:attribute name="filter" type="Object"/>
 	<aura:attribute name="multiple" type="Boolean" default="false"/>
-
-	<!-- should this be private? -->
 	<aura:attribute name="selectedFilters" type="List"/>
 
     <aura:registerEvent name="filterRequested" type="c:CMEDataGridFilterRequest"/>
 
 	<aura:if isTrue="{! !v.multiple }">
-		<lightning:select name="{!v.filter.Name}" label="{!v.filter.Name}" class="slds-p-right_small" onchange="{!c.onFilterSelect}">
-			<option text="{!v.filter.DefaultLabel || 'All ' + v.filter.Name}" value="All"/>
+		<lightning:select aura:id="single" name="{!v.filter.Name}" label="{!v.filter.Label}" class="slds-p-right_small" onchange="{!c.onFilterSelect}" value="{!v.filter.SelectedValues[0]}">
+			<option text="{!v.filter.DefaultLabel || 'All ' + v.filter.Label}" value="All"/>
 			<aura:iteration items="{!v.filter.FilterOptions}" var="opt">
 				<aura:if isTrue="{!v.filter.Type != 'Datetime' &amp;&amp; v.filter.Type != 'Checkbox'}">
 					<option text="{!opt.label}" value="{!opt.value}"/>
@@ -25,7 +23,7 @@
 		</lightning:select>
 	
 	<aura:set attribute="else">
-		<lightning:checkboxGroup name="{!v.filter.Name}" label="{!v.filter.Name}" class="slds-p-right_small" 
+		<lightning:checkboxGroup name="{!v.filter.Name}" label="{!v.filter.DefaultLabel}" class="slds-p-right_small" 
 							onchange="{!c.onFilterSelect}"	options="{!v.filter.FilterOptions}" value="{!v.selectedFilters}"
 		/>
 	</aura:set>

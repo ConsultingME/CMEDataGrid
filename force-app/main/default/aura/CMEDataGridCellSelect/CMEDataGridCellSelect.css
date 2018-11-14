@@ -1,0 +1,10 @@
+.THIS .cme-grid-checkbox .slds-form-element__label {
+    display: none !important;
+}
+
+.THIS #erroricon {
+    float: right;
+    margin-top: -19px;
+    margin-right: -12px;
+}
+

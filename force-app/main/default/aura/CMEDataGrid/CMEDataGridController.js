@@ -1,6 +1,10 @@
 ({
 	onInit: function (component, event, helper) {
 		helper.detectContainer(component);
+		const datarows = component.get("v.datarows");
+		if (!$A.util.isEmpty(datarows)) {
+			helper.datarowsChanged(component, event, helper);
+		}
 		const fl = component.get("v.filterList");
 		if (!$A.util.isEmpty(fl)) {
 			helper.processExternalFilter(component, fl);
@@ -141,10 +145,58 @@
 
 	onPageSizeChanged: function (component, event, helper) {
 		//component.set("v.pageSize", component.find("pageSizeSelect").get("v.value"));
+		component.set("v.pageSize", parseInt(component.get("v.pageSize")));
 		helper.initPaging(component);
 	},
 
 	onFilterToggleClick: function (component, event, helper) {
 		component.set("v.filtersOpen", !component.get("v.filtersOpen"));		
+	},
+
+	actionFired: function (component, event, helper) {
+		const src = event.getSource();
+		const columns = component.get("v.columns");
+		const actionCols = columns.filter(function(c) {
+			if (c.Type != undefined && c.Type === 'ActionGroup') {
+				for (let x = 0; x < c.ActionList.length; x++) {
+					if (c.ActionList[x].Name === event.getParam("Action")) {
+						return c.ActionList[x].Type != undefined && c.ActionList[x].Type === 'Stateful';
+					}
+				}
+				return false;
+			} else {
+				return false;
+			}
+		});
+		if (!$A.util.isEmpty(actionCols)) {
+			const rows = component.find("row");
+			if (rows.map) {
+				rows.map(function(r) {
+					r.resetToggleActions(src.getGlobalId());
+				});	
+			} else {
+				rows.resetToggleActions(src.getGlobalId());
+			}
+		}	
+	},
+
+	onRefreshClick: function (component, event, helper) {
+		const evt = $A.get("e.force:refreshView");
+		evt.fire();
+	},
+
+    toggleLeftPanel: function(component, event, helper) {
+        var toggleText = component.find("leftPanel");
+        $A.util.toggleClass(toggleText, "slideLeftPanel");
+
+        var toggleText = component.find("leftPanelButton");
+        $A.util.toggleClass(toggleText, "flipButtonImage");
+    },
+
+	onFilterPillRemove: function(component, event, helper) {
+		const toRemoveName = event.getParam("item").name;
+		const toRemove = toRemoveName.split("|"); //0 is name, 1 is value to remove
+
+		helper.updateFilter(component, toRemove[0], toRemove[1]);
 	}
 })

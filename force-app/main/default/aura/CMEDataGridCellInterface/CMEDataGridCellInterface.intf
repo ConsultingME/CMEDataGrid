@@ -1,0 +1,5 @@
+<aura:interface description="Interface for grid cell components">
+	<aura:attribute name="data" type="Object"/>
+	<aura:attribute name="selectAll" type="Boolean" default="false"/>
+    <aura:attribute name="isSFOne" type="Boolean" default="false"/>
+</aura:interface>

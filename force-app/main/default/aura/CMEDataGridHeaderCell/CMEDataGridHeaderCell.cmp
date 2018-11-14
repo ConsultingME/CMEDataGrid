@@ -4,7 +4,7 @@
     <aura:attribute name="sortAsc" type="Boolean" default="false"/>
     <aura:attribute name="sorted" type="Boolean" default="false" access="private"/>
 	<aura:attribute name="sortBy" type="String" />
-	<aura:attribute name="isFiltered" type="Boolean" default="false" access="private" />
+	<aura:attribute name="isFiltered" type="Boolean" default="false" />
 
     <aura:registerEvent name="sortRequested" type="c:CMEDataGridSortRequest"/>
     <aura:registerEvent name="filterRequested" type="c:CMEDataGridFilterRequest"/>
@@ -21,8 +21,8 @@
 				<a onclick="{!c.doSort}" class="slds-truncate slds-th__action slds-text-link--reset" tabindex="0">
 					<span class="slds-assistive-text">Sort</span>
 					<span class="slds-truncate cme-datagrid-header-text" title="{!v.config.Label}">{!v.config.Label}</span>
-					<lightning:icon iconName="utility:arrowup" size="xx-small" class="{! if (or(not(v.sorted), not(v.sortAsc)), 'hidden')}"/>
-					<lightning:icon iconName="utility:arrowdown" size="xx-small" class="{! if (or(not(v.sorted), v.sortAsc), 'hidden')}" />
+					<lightning:icon iconName="utility:arrowup" size="xx-small" class="{! if (or(not(v.sorted), not(v.sortAsc)), 'slds-hide')}"/>
+					<lightning:icon iconName="utility:arrowdown" size="xx-small" class="{! if (or(not(v.sorted), v.sortAsc), 'slds-hide')}" />
 					<span class="slds-assistive-text" aria-live="assertive" aria-atomic="true"></span>
 				</a>
 			</aura:set>

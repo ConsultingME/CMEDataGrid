@@ -39,7 +39,6 @@
 	selectAll: function(component, event, helper) {
 		var selected = component.find("selectAll").getElement().checked;
 		var rows = component.get("v.displayedrows");
-		//console.log(rows);
 		rows.forEach(function(dr) {
 			if (true === dr.rowstatus.Selectable)
 				dr.cmeselected = selected;
@@ -51,7 +50,6 @@
 	},
 
 	datarowsChanged: function(component, event, helper) {
-		//console.log('datarowschanged');
 		var datarows = component.get("v.datarows");
 		var internaldatarows = [], internalcolumns = [];
 		var columns = component.get("v.columns");
@@ -96,126 +94,48 @@
 			internaldatarows.push(newdr);
 			q++;
 		});
-			//console.log(internaldatarows);
 
 		var fo = [],  g=0;
-
-		var ff = function(dr) {
-					//console.log(dr[q]);
-					var v = dr.cmeoutputlist[g].value;
-					if (!$A.util.isEmpty(v)) {
-						if (!v.map) {
-							generateFilterOptions(v);
-							//if (dr.cmeoutputlist[g].config.Type === 'Checkbox' && dr.cmeoutputlist[g].config.TrueLabel) {
-							//	var label = v === true ? dr.cmeoutputlist[g].config.TrueLabel : dr.cmeoutputlist[g].config.FalseLabel;
-							//	var opt = fo.filter(function (o) {
-							//		return o.label == label;
-							//	});
-							//	if (opt.length == 0) {
-							//		v = {label: label, value: v};
-							//		fo.push(v);
-							//	}
-							//	return;
-							//}
-							//if (dr.cmeoutputlist[g].config.Type === 'SObjectLink') {
-							//	v = v.Text;
-							//}
-							//if (dr.cmeoutputlist[g].config.Type === 'Datetime') {
-							//	if (v) {
-							//		var label = v.toLocaleString(undefined, dateConfig);
-							//		if (-1 === rawDates.indexOf(label)) {
-							//			v = {label: label, value: v, UTCvalue: v.toUTCString()};
-							//			fo.push(v);
-							//			rawDates.push(label);
-							//		}
-							//		return;
-							//	}
-							//}
-							//if (v && -1 === fo.indexOf(v)) {
-							//	fo.push(v);
-							//}
-
-						} else {
-							v.map(function(v) { 
-								generateFilterOptions(v);
-							});
-						}
-					}
-
-					function generateFilterOptions(v) {
-						if ((dr.cmeoutputlist[g].config.Type === 'Checkbox' || dr.cmeoutputlist[g].config.Type === 'BooleanIcon') && dr.cmeoutputlist[g].config.TrueLabel) {
-							var label = v === true ? dr.cmeoutputlist[g].config.TrueLabel : dr.cmeoutputlist[g].config.FalseLabel;
-							var opt = fo.filter(function (o) {
-								return o.label == label;
-							});
-							if (opt.length == 0) {
-								v = {label: label, value: v};
-								fo.push(v);
-							}
-							return;
-						}
-						if (dr.cmeoutputlist[g].config.Type === 'Currency') {
-							v = (v.Amount) ? v.Amount.toLocaleString(undefined, {style: 'currency', currency: v.CurrencyCode}) : '';
-						}
-						if (dr.cmeoutputlist[g].config.Type === 'SObjectLink') {
-							v = v.Text;
-						}
-						if (dr.cmeoutputlist[g].config.Type === 'Datetime') {
-							if (v) {
-								var label = v.toLocaleString(undefined, dateConfig);
-								if (-1 === rawDates.indexOf(label)) {
-									v = {label: label, value: v.toUTCString(), sortValue: v};
-									fo.push(v);
-									rawDates.push(label);
-								}
-								return;
-							}
-						}
-						var opt = fo.filter(function (o) {
-							return o.label == v;
-						});
-						if (opt.length == 0) {
-							v = {label: v, value: v};
-							fo.push(v);
-						}
-						return;
-					}
-				};
-
 		var textFiltering = component.get("v.filterByText");
 		var filterColumnsIndexList = component.get("v.filterColumnsIndexList");
 		var filterHeaderList = {visible: [], other: [], get length() { return this.visible.length + this.other.length; }};
 		const fl = component.get("v.p_filterlist");
 		for(g=0; g < columns.length; g++) {
 			if (!(!$A.util.isEmpty(columns[g].Visible) && (columns[g].Visible === false))) {
+				columns[g].isFiltered = false;
 				internalcolumns.push(columns[g]);
 			}
 			if (columns[g].Filter && true === columns[g].Filter) {
 				var config = columns[g];
-				var dateConfig = null, rawDates = [];
-				var isDate = false;
+				var dateConfig = null, rawData = [];
+				var useSortValue = false;
 				if (config.Type && config.Type != null && config.Type === 'Datetime') {
-					isDate = true;
 					dateConfig = this.getDateConfig(config);
 				}
 				fo = [];
-				internaldatarows.map(ff);
+				internaldatarows.map(function(dr) {
+					helper.generateFilterMetadata(dr, g, fo);
+				});
 				if (config.Type && config.Type === 'Number') {
 					fo.sort(function compareNumbers(a, b) {
 						var x = $A.util.isEmpty(a.value) === false ? a.value : Number.NEGATIVE_INFINITY;
 						var y = $A.util.isEmpty(b.value) === false ? b.value : Number.NEGATIVE_INFINITY;
 						return x - y;
 					});
-				} else if (isDate === false) {
+				} else if (useSortValue === true) {
 					fo.sort(function compareNumbers(a, b) {
-						var x = a.label;
-						var y = b.label;
-						return x - y;
+						var x = $A.util.isEmpty(a.sortValue) === false ? a.sortValue : new Date(0);
+						var y = $A.util.isEmpty(b.sortValue) === false ? b.sortValue : new Date(0);
+						if (x > y)
+							return 1;
+						if (x < y)
+							return -1;
+						return 0;
 					});
 				} else {
 					fo.sort(function (a, b) {
-						var x = $A.util.isEmpty(a.sortValue) === false ? a.sortValue : new Date(0);
-						var y = $A.util.isEmpty(b.sortValue) === false ? b.sortValue : new Date(0);
+						var x = a.label;
+						var y = b.label;
 						if (x > y)
 							return 1;
 						if (x < y)
@@ -226,7 +146,6 @@
 				if (columns[g].FilterLocation) {
 					switch (columns[g].FilterLocation) {
 						case 'header' :
-							//var dl = (columns[g].DefaultLabel) ? columns[g].DefaultLabel : 'All';
 							const type = columns[g].Type || 'Text';
 							var sv = [];
 							fl.map(function(f) { if (f.field === columns[g].PropertyName) if (!f.value.map) sv.push(f.value); else sv = f.value;})
@@ -255,16 +174,12 @@
 			}
 		}
 		if (filterColumnsIndexList.length > 0) {
-			//console.log('filter columns index list:');
-			//console.log(filterColumnsIndexList);
 			component.set("v.filterColumnsIndexList", filterColumnsIndexList);
 		}
 		if (filterHeaderList.length > 0) {
 			component.set("v.filterHeaderList", filterHeaderList);
 		}
 
-		//console.log(columns);
-		//console.log(internaldatarows);
 		component.set("v.internalcolumns", internalcolumns);
 		component.set("v.internaldatarows", internaldatarows);
 	},
@@ -273,49 +188,32 @@
 		if (idr === undefined || idr === null) {
 			idr = component.get("v.internaldatarows");
 		}
-		//component.set("v.displayedrows", idr);
-		this.setSelectedList(component, idr);
 		this.sort(component, event, helper, idr);
+		this.filter(component, helper);
+		this.setSelectedList(component, idr);
 	},
 
 	setSelectedList:function (component, idr) {
 		if (idr === undefined || idr === null) {
 			idr = component.get("v.displayedrows");
 		}
-		//var selected = [];
-		//idr.map(function(dr) {
-		//	if (true === dr.cmeselected)
-		//		selected.push(dr.datarow);
-		//});
-		//var selected = idr.filter(function(dr) {
-		//	return true === dr.cmeselected;
-		//});
 		var selected = [];
 		idr.map(function(dr) {
 			if (true === dr.cmeselected) {
 				selected.push(dr.datarow);
 			}
 		});
-		//console.log(selected);
 		component.set("v.selectedrows", selected);
 	},
 
 	handleRowSelected: function (component, event, helper) {
-		//console.log('root handle row selected');
-		//component.set("v.internaldatarows", rows);
-		//console.log(rows);
-		//console.log(current);
 		var singlemode = !component.get("v.multiSelect");
 		if (true === singlemode) {
 			var selectedRow = event.getParam("SelectedRow");
-			//console.log('selected row:')
-			//console.log(selectedRow);
 			if (null != selectedRow) {
 				var rows = component.get("v.displayedrows");
 				for (var q = 0; q < rows.length; q++) {
-					//console.log(rows[q].cmeid);
 					if (selectedRow.cmeid !== rows[q].cmeid) {
-						//console.log('reset previous selected row');
 						rows[q].cmeselected = false;
 					}
 				}
@@ -329,9 +227,6 @@
 	},
 
 	filter: function(component, helper) {
-		//console.log('filter');
-		//console.log(component.get("v.filterlist"));
-
 		const self = this;
 
 		var fl = component.get("v.p_filterlist");
@@ -340,7 +235,6 @@
 
 		var config = component.get("v.columns");
 		var pills = [];
-		//console.log(rows.length);
 		if (fl.length > 0) {
 			fl.map(function(f) {
 				switch (f.type) {
@@ -349,60 +243,54 @@
 							const column = config.filter(function(c) { return c.PropertyName === f.field; })[0];
 							if (f.isExternal === undefined || f.isExternal === false) {
 								if (!f.value.map) {
-									getFilterPill(f.field, f.value, f.value, column);
+									pills.push(self.generateFilterPill(f.field, f.value, f.value, column));
 								} else {
 									f.value.map(function(fv) {
-										getFilterPill(f.field, fv, fv, column);
+										pills.push(self.generateFilterPill(f.field, fv, fv, column));
 									});
 								}
 
-								function getFilterPill(field, label, value, column) {
-									var filterPillData = {field: field, label: label, value: value, icon: column.FilterPillIcon};
-									if (column.Type === 'Checkbox' || column.Type === 'BooleanIcon') {
-										filterPillData.label = (value == true || value == 'true') ? column.TrueLabel || true : column.FalseLabel || false;
-									} else if (column.Type === 'SObjectLink') {
-									} else if (column.Type === 'Datetime') {
-										filterPillData.label = value.toLocaleString(undefined, self.getDateConfig(column));
-									} else if (column.Type === 'Number') {
-									} else if (column.Type === 'Currency') {
-										//return !($A.util.isEmpty(datavalue) || $A.util.isEmpty(datavalue.Amount)) ?  ((datavalue.Amount.toLocaleString) ? datavalue.Amount.toLocaleString(undefined, {style: 'currency', currency: datavalue.CurrencyCode}) : '') === filtervalue : false;
-									}
-
-									pills.push({
-										type: ($A.util.isEmpty(filterPillData.icon)) ? null : 'icon',
-										label: filterPillData.label,
-										iconName: filterPillData.icon,
-										alternativeText: filterPillData.label,
-										name: filterPillData.field + '|' + filterPillData.value
-									});
-								}
 							}
 						}
 
 						rows = rows.filter(function(idr) {
 								for(var q=0; q < idr.cmeoutputlist.length; q++) {
 									var d = idr.cmeoutputlist[q];
-									if (!$A.util.isEmpty(d.value) && f.field === d.config.PropertyName) {
-										//TODO: optimize?
-										if (!d.value.map) {
+									if (f.field === d.config.PropertyName) {
+
+										var nv = (d.value !== undefined) ? JSON.parse(JSON.stringify(d.value)) : null;
+										if (nv && d.value.getYear) {
+											nv = d.value;
+										}
+										const cc = d.value ? d.value.CurrencyCode : null;
+										var prop = idr.cmeoutputlist[q].config.PropertyName;
+										var proppath = prop.split('.');
+										if (proppath.length > 1) {
+											nv = [];
+											helper.populateValues(nv, idr.datarow[proppath[0]], proppath, 1, idr.cmeoutputlist[q].config, cc);
+										}
+										//var nv = d.config.FilterOptions;
+										if (nv === null) return false;
+
+										if (!nv.map) {
 											if (!f.value.map) {
-												return testValue(d.config, d.value, f.value);
+												return helper.testFilterValue(d.config, nv, f.value);
 											} else {
 												for (var y = 0; y < f.value.length; y++) {
-													if (testValue(d.config, d.value, f.value[y])) {
+													if (helper.testFilterValue(d.config, nv, f.value[y])) {
 														return true;
 													}
 												}
 											}
 										} else {
-											for (var x = 0; x < d.value.length; x++) {
+											for (var x = 0; x < nv.length; x++) {
 												if (!f.value.map) {
-													if (testValue(d.config, d.value[x], f.value)) {
+													if (helper.testFilterValue(d.config, nv[x], f.value)) {
 														return true;
 													}
 												} else {
 													for (var y = 0; y < f.value.length; y++) {
-														if (testValue(d.config, d.value[x], f.value[y])) {
+														if (helper.testFilterValue(d.config, nv[x], f.value[y])) {
 															return true;
 														}
 													}
@@ -412,26 +300,6 @@
 									} 
 								}
 								return false;
-
-								function testValue(config, datavalue, filtervalue) {
-									if (config.Type === 'Checkbox' || config.Type === 'BooleanIcon') {	// && d.config.TrueLabel
-										//d.value ? d.config.TrueLabel : d.config.FalseLabel;
-										//return v === f.value;
-										//filterPillData = {icon: config.FilterPillIcon, label: filtervalue == true ? config.TrueLabel || true : config.FalseLabel || false};
-										return datavalue.toString() === filtervalue.toString();
-									} else if (config.Type === 'SObjectLink') {
-										return datavalue.Text === filtervalue;
-									} else if (config.Type === 'Datetime') {
-										//filterPillData = {icon: config.FilterPillIcon, label: filtervalue.toLocaleString(undefined, self.getDateConfig(config))};
-										return (datavalue) ?  datavalue.toUTCString() === ((filtervalue.toUTCString) ? filtervalue.toUTCString() : filtervalue) : false;
-									} else if (config.Type === 'Number') {
-										return (datavalue) ?  Number(datavalue) === Number(filtervalue) : false;
-									} else if (config.Type === 'Currency') {
-										return !($A.util.isEmpty(datavalue) || $A.util.isEmpty(datavalue.Amount)) ?  ((datavalue.Amount.toLocaleString) ? datavalue.Amount.toLocaleString(undefined, {style: 'currency', currency: datavalue.CurrencyCode}) : '') === filtervalue : false;
-									} else {
-										return datavalue === filtervalue;
-									}
-								}
 							});
 
 							component.set("v.filterPills", pills);
@@ -445,7 +313,6 @@
 							}
 							var match = false;
 							for(var q=0; q < filterColumnsIndexList.length; q++) {
-								//console.log(idr.cmeoutputlist[q].value);
 								if (idr.cmeoutputlist[filterColumnsIndexList[q]].config.IncludeInTextFilter && true === idr.cmeoutputlist[filterColumnsIndexList[q]].config.IncludeInTextFilter) {
 									var data = idr.datarow[idr.cmeoutputlist[filterColumnsIndexList[q]].config.PropertyName];
 									match = data && -1 !== String(data).toLowerCase().indexOf(f.value.toLowerCase());
@@ -463,74 +330,11 @@
 		} else {
 			component.set("v.filterPills", []);
 		}
-		//console.log(rows);
 		try { component.set("v.displayedrows", rows); } catch(exc) {/*buttonIcon sometimes throws an exception when being destroyed so just eat it */}
 
 		helper.toggleFilterSpinner(component, component.get("v.spinnerId"), false);
 	},
-/*
-	filterByCol: function (component, event, helper) {
-		var filterOptions = event.getParams();
-		//console.log(filterOptions);
-		var rows = component.get("v.displayedrows");
-		var filteredlist;
-		if ("All" !== filterOptions.value) {
-			filteredlist = rows.filter(function(idr) {
-				for(var q=0; q < idr.cmeoutputlist.length; q++) {
-					var d = idr.cmeoutputlist[q];
-					if (filterOptions.column === d.config.PropertyName) {
-						if (d.config.Type === 'Checkbox' && d.config.TrueLabel) {
-							var v = d.value ? d.config.TrueLabel : d.config.FalseLabel;
-							return v === filterOptions.value;
-						} else {
-							return d.value === filterOptions.value;
-						}
-					} 
-				}
-				return false;
-			});
-		} else {
-			filteredlist = rows;
-		}
-		//console.log(filteredlist);
-		try {
-			component.set("v.displayedrows", filteredlist);
-		} catch (e) {}
-		this.setSelectedList(component);
-		helper.toggleFilterSpinner(component, "cme-datagrid-clientworking", false);
-	},
 
-	filterByText: function (component, helper, text) {
-		var internaldatarows = component.get("v.internaldatarows");
-		var filteredlist;
-		if ("" !== text) {
-			var filterColumnsIndexList = component.get("v.filterColumnsIndexList");
-			var match;
-			var data;
-			filteredlist = internaldatarows.filter(function(idr) {
-				match = false;
-				for(var q=0; q < filterColumnsIndexList.length; q++) {
-					//console.log(idr.cmeoutputlist[q].value);
-					if (idr.cmeoutputlist[filterColumnsIndexList[q]].config.IncludeInTextFilter && true === idr.cmeoutputlist[filterColumnsIndexList[q]].config.IncludeInTextFilter) {
-						data = idr.datarow[idr.cmeoutputlist[filterColumnsIndexList[q]].config.PropertyName];
-						match = data && -1 !== String(data).toLowerCase().indexOf(text.toLowerCase());
-					} 
-					if (match === true)
-						return match;
-				}
-				return match;
-			});
-		} else {
-			filteredlist = internaldatarows;
-		}
-		//console.log(filteredlist);
-		try {
-			component.set("v.displayedrows", filteredlist);
-		} catch (e) {}
-		this.setSelectedList(component);
-		helper.toggleFilterSpinner(component, "cme-datagrid-clientworking", false);
-	},
-*/
 	processExternalFilter: function(component, filterOptions) {
 		filterOptions.map(function(f) { f.isExternal = true; });
 		this.processFilter(component, filterOptions);
@@ -549,12 +353,10 @@
 					break;
 				}
 			}
-			//if ("All" !== filterOptions.value || !(filterOptions.value.length && filterOptions.value.length !== 0)) {
 			if ((fo.value.map !== undefined) ? fo.value.length !== 0 : "All" !== fo.value) {
 				fl.push({type: 'Col', field: fo.column, value: fo.value, isExternal: fo.isExternal});
 			}
 		});
-		//console.log(fl);
 		component.set("v.p_filterlist", fl);
 	},
 
@@ -562,15 +364,11 @@
 		var pk = component.get("v.primaryKey");
 
 		if (null != pk) {
-			//console.log(event.getParams());
 			var rsl = event.getParam("arguments").RowStatusList;
-			//console.log(rsl);
 			var datarows = component.get("v.displayedrows");
-			//console.log(datarows);
 			for(var a = 0; a < rsl.length; a++) {
 				for(var b = 0; b < datarows.length; b++) {
 					if (datarows[b].datarow[pk] === rsl[a].PrimaryKey) {
-						//console.log('got it!');
 						if (false === rsl[a].Selectable)
 							datarows[b].cmeselected = false;
 						datarows[b].rowstatus.Selectable = rsl[a].Selectable;
@@ -580,14 +378,13 @@
 				}
 			}
 			component.set("v.displayedrows", datarows);
-			//this.setSelectedList(component);
 		}
 	},
 
 	initPaging: function(component) {
-		//console.log('initPaging');
 		var pageSize = parseInt(component.get("v.pageSize"));
 		var displayedrows = component.get("v.displayedrows");
+		var pagedrows = displayedrows, pages = [displayedrows];
 		if (displayedrows.length > pageSize) {
 			var pages = [];
 			var x = 0;
@@ -596,33 +393,28 @@
 				pages.push(page);
 				x += pageSize
 			}
-			component.set("v.pagedrows", pages[0]);
-			component.set("v.pages", pages);
-		} else {
-			component.set("v.pagedrows", displayedrows);
-			component.set("v.pages", [displayedrows]);
+			pagedrows = pages[0];
+			pages = pages;
 		}
+		component.set("v.pages", pages);
 		component.set("v.currentpage", 0);
 		component.set("v.movetopage", 0);
+		try {
+			component.set("v.pagedrows", pagedrows);
+		} catch (e) { /*buttonIcon throws exception, just eat it */}
 	},
 
 	setPaging: function(component, helper) {
+		console.log("Set paging: " + Date.now());
 		var movetopage = component.get("v.movetopage");
 		component.set("v.currentpage", movetopage);
-		component.set("v.pagedrows", component.get("v.pages")[movetopage]);
 
-//		console.log('setPaging');
-//		var pageSize = component.get("v.pageSize");
-//		var displayedrows = component.get("v.displayedrows");
-//		if (displayedrows.length > pageSize) {
-//			var currentPage = component.get("v.currentpage");
-//			var currentIndex = currentPage*pageSize
-//			var page = displayedrows.slice(currentIndex, currentIndex+pageSize);
-//			component.set("v.pagedrows", page);
-//		} else {
-//			component.set("v.pagedrows", displayedrows);
-//		}
+		try {
+			component.set("v.pagedrows", component.get("v.pages")[movetopage]);
+		} catch (e) { /*buttonIcon throws exception, just eat it */}
+
 		helper.toggleFilterSpinner(component, component.get("v.spinnerId"), false);
+		console.log("End paging: " + Date.now());
 	},
 
 	toggleFilterSpinner: function(component, id, show) {
@@ -633,17 +425,215 @@
 	},
 
 	detectContainer: function(component) {
-		const isSFOne = !$A.util.isEmpty($A.get("e.force:navigateToSObject"));
+		const isSFOne = !$A.util.isEmpty($A.get(component.get("v.sfOneAppDetectEvent")));
 		console.log('isSFOne: ' + isSFOne);
 		component.set("v.isSFOne", isSFOne);
 	},
 
 	getDateConfig: function(config) {
-		return { 
-					year: config.Format.Year, month: config.Format.Month, day: config.Format.Day
-					, hour: config.Format.Hour, hour12: config.Format.Hour12, minute: config.Format.Minute, second: config.Format.Second
-					, weekday: config.Format.Weekday
-					, timeZone: config.Format.TimeZone, timeZoneName: config.Format.TimeZoneName
-				};
+		if (config.Format) {
+			return { 
+						year: config.Format.Year, month: config.Format.Month, day: config.Format.Day
+						, hour: config.Format.Hour, hour12: config.Format.Hour12, minute: config.Format.Minute, second: config.Format.Second
+						, weekday: config.Format.Weekday
+						, timeZone: config.Format.TimeZone, timeZoneName: config.Format.TimeZoneName
+					};
+		}
+		return {};
+	},
+
+	populateValues: function(arr, o, proppath, i, c, cc) {
+		const self = this;
+		if (!$A.util.isEmpty(o)) {
+			if (o.map) {
+				o.map(function(r) {
+					self.populateValues(arr, r, proppath, i, c, cc);
+				});
+			} else if (typeof o !== "object") {
+				if (c.Type === 'Currency') {
+					arr.push({Amount: o, CurrencyCode: cc});
+				} else {
+					arr.push(o);
+				}
+			} else {
+				if (o.getYear) {
+					arr.push(o);
+				} else {
+					self.populateValues(arr, o[proppath[i]], proppath, i+1, c, cc);
+				}
+			}
+		}
+	},
+
+	updateFilter: function(component, filtername, filtervalue) {
+		var filters = component.get("v.p_filterlist");
+		var thisfilter = null;
+		for(let x=0; x<filters.length; x++) {
+			if (filters[x].field === filtername) {
+				thisfilter = filters[x];
+				thisfilter.column = thisfilter.field;
+				//if value is not a list, set it to 'All'
+				//if value is list, remove value from list. set value = updated list or All (if empty list)
+				if (!thisfilter.value.map) {
+					thisfilter.value = "All";
+				} else {
+					for (let y = 0; y < thisfilter.value.length; y++) {
+						if (thisfilter.value[y] === filtervalue) {
+							thisfilter.value.splice(y, 1);
+							break;
+						}
+					}
+					if (thisfilter.value.length === 0) {
+						thisfilter.value = "All";
+					}
+				}
+				break;
+			}
+		}
+
+		this.processFilter(component, thisfilter);
+
+		//reset header filter selection UI
+
+		const hdrfltrs = component.get("v.filterHeaderList");
+
+		var foundhdr = this.removeFilter(hdrfltrs.visible, filtername, filtervalue);
+		if (!foundhdr) {
+			foundhdr = this.removeFilter(hdrfltrs.other, filtername, filtervalue);
+		}
+
+		if (foundhdr) {
+			component.set("v.filterHeaderList", hdrfltrs);
+		} else {
+			//check column filters
+			const cols = component.get("v.internalcolumns");
+			for (let x=0; x<cols.length; x++) {
+				if (cols[x].PropertyName === filtername) {
+					cols[x].isFiltered = false;
+					break;
+				}
+			}
+			component.set("v.internalcolumns", cols);
+		}
+	},
+
+	removeFilter: function(list, name, value) {
+		for(let x=0; x<list.length; x++) {
+			if (list[x].Name === name) {
+				list[x].SelectedValues.splice(list[x].SelectedValues.indexOf(value), 1);
+				return true;
+			}
+		}
+		return false;
+	},
+
+	generateFilterPill: function (field, label, value, column) {
+		var filterPillData = {field: field, label: label, value: value, icon: column.FilterPillIcon};
+		if (column.Type === 'Checkbox' || column.Type === 'BooleanIcon') {
+			filterPillData.label = (value == true || value == 'true') ? column.TrueLabel || true : column.FalseLabel || false;
+		} else if (column.Type === 'SObjectLink') {
+		} else if (column.Type === 'Datetime') {
+			filterPillData.label = value.toLocaleString(undefined, this.getDateConfig(column));
+		} else if (column.Type === 'Number') {
+		} else if (column.Type === 'Currency') {
+			//return !($A.util.isEmpty(datavalue) || $A.util.isEmpty(datavalue.Amount)) ?  ((datavalue.Amount.toLocaleString) ? datavalue.Amount.toLocaleString(undefined, {style: 'currency', currency: datavalue.CurrencyCode}) : '') === filtervalue : false;
+		}
+
+		return {
+			type: ($A.util.isEmpty(filterPillData.icon)) ? null : 'icon',
+			label: filterPillData.label,
+			iconName: filterPillData.icon,
+			alternativeText: filterPillData.label,
+			name: filterPillData.field + '|' + filterPillData.value
+		};
+	},
+
+	testFilterValue: function(config, datavalue, filtervalue) {
+		if (config.Type === 'Checkbox' || config.Type === 'BooleanIcon') {	// && d.config.TrueLabel
+			return datavalue.toString() === filtervalue.toString();
+		} else if (config.Type === 'SObjectLink') {
+			return datavalue.Text === filtervalue;
+		} else if (config.Type === 'Datetime') {
+			return (datavalue) ?  datavalue.toUTCString() === ((filtervalue.toUTCString) ? filtervalue.toUTCString() : filtervalue) : false;
+		} else if (config.Type === 'Number') {
+			return (datavalue) ?  Number(datavalue) === Number(filtervalue) : false;
+		} else if (config.Type === 'Currency') {
+			return !($A.util.isEmpty(datavalue) || $A.util.isEmpty(datavalue.Amount)) ?  ((datavalue.Amount.toLocaleString) ? datavalue.Amount.toLocaleString(undefined, {style: 'currency', currency: datavalue.CurrencyCode}) : '') === filtervalue : false;
+		} else {
+			return datavalue === filtervalue;
+		}
+	},
+
+	generateFilterOptions: function(v, config, fo) {
+		if ((config.Type === 'Checkbox' || config.Type === 'BooleanIcon') && config.TrueLabel) {
+			var label = v === true ? config.TrueLabel : config.FalseLabel;
+			var opt = fo.filter(function (o) {
+				return o.label == label;
+			});
+			if (opt.length == 0) {
+				v = {label: label, value: v};
+				fo.push(v);
+			}
+			return;
+		}
+		if (config.Type === 'Currency') {
+			useSortValue = true;
+			let cv = (v.Amount) ? v.Amount.toLocaleString(undefined, {style: 'currency', currency: v.CurrencyCode}) : '';
+			if (-1 === rawData.indexOf(cv)) {
+				v = {label: cv, value: cv, sortValue: v.Amount};
+				fo.push(v);
+				rawData.push(cv);
+			}
+			return;
+		}
+		if (config.Type === 'SObjectLink') {
+			v = v.Text;
+		}
+		if (config.Type === 'Datetime') {
+			var dateConfig = this.getDateConfig(config);
+			useSortValue = true;
+			if (v) {
+				var label = v.toLocaleString(undefined, dateConfig);
+				if (-1 === rawData.indexOf(label)) {
+					v = {label: label, value: v.toUTCString(), sortValue: v};
+					fo.push(v);
+					rawData.push(label);
+				}
+				return;
+			}
+		}
+		var opt = fo.filter(function (o) {
+			return o.label == v;
+		});
+		if (opt.length == 0) {
+			v = {label: v, value: v};
+			fo.push(v);
+		}
+		return;
+	},
+
+	generateFilterMetadata: function(dr, g, fo) {
+		const self = this;
+		var v = dr.cmeoutputlist[g].value;
+		if ($A.util.isEmpty(v) || (dr.cmeoutputlist[g].config.Type === 'Currency' && v.Amount === '')) {
+			const cc = v ? v.CurrencyCode : null;
+			var prop = dr.cmeoutputlist[g].config.PropertyName;
+			var proppath = prop.split('.');
+			if (proppath.length > 1) {
+				v = [];
+				self.populateValues(v, dr.datarow[proppath[0]], proppath, 1, dr.cmeoutputlist[g].config, cc);
+				//TODO: save these here per row so we dont have to recalculate them in the filter process
+				//dr.cmeoutputlist[g].config.FilterOptions = v;
+			}
+		}
+		if (!$A.util.isEmpty(v)) {
+			if (!v.map) {
+				self.generateFilterOptions(v, dr.cmeoutputlist[g].config, fo);
+			} else {
+				v.map(function(v) { 
+					self.generateFilterOptions(v, dr.cmeoutputlist[g].config, fo);
+				});
+			}
+		}
 	}
 })

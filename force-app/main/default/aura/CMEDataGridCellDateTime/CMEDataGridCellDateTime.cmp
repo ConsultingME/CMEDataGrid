@@ -1,0 +1,12 @@
+<aura:component implements="c:CMEDataGridCellInterface">
+        <td role="gridcell" class="{!'slds-truncate ' + v.data.config.CellClass}">
+                <div class="slds-truncate" title="{!v.data.value}">
+					<lightning:formattedDateTime value="{!v.data.value}" 
+                                             year="{!v.data.config.Format.Year}" month="{!v.data.config.Format.Month}" day="{!v.data.config.Format.Day}" 
+                                             hour="{!v.data.config.Format.Hour}" hour12="{!v.data.config.Format.Hour12}" minute="{!v.data.config.Format.Minute}" second="{!v.data.config.Format.Second}"
+                                             weekday="{!v.data.config.Format.Weekday}"
+                                             timeZone="{!v.data.config.Format.TimeZone}" timeZoneName="{!v.data.config.Format.TimeZoneName}"
+                                             />
+				</div>
+		</td>
+</aura:component>

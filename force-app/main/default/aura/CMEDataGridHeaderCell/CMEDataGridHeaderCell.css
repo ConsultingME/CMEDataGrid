@@ -51,7 +51,3 @@
 .THIS .cme-filterbuttonred button:focus span svg {
 	fill: #EF6E64 !important;
 }
-
-.THIS .hidden {
-    display: none;
-}

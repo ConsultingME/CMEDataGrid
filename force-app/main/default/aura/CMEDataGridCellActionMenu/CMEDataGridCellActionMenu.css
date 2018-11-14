@@ -1,0 +1,8 @@
+.THIS .cme-actionmenu {
+    margin: -4px 0;
+}
+
+.THIS .cme-actionmenu-item {
+	display: list-item;
+	margin-left: 0 !important;
+}

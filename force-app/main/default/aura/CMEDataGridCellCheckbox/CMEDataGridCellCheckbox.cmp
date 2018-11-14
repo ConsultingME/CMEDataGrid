@@ -1,0 +1,7 @@
+<aura:component implements="c:CMEDataGridCellInterface">
+
+	<td role="gridcell" class="{!'slds-truncate ' + v.data.config.CellClass}">
+		<lightning:input type="checkbox" label="{!v.data.config.Label}" checked="{!v.data.value}" class="{!'cme-grid-checkbox ' + v.data.config.Format.Class}" disabled="true" name="{!join('-','cme-datagrid',globalid,'checkbox-data')}" />
+	</td>
+
+</aura:component>

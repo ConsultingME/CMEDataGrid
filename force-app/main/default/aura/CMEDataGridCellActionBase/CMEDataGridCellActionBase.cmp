@@ -1,0 +1,7 @@
+<aura:component extensible="true" implements="c:CMEDataGridCellInterface">
+
+    <aura:registerEvent name="ActionFired" type="c:CMEDataGridActionFired"/>
+
+	{!v.body}
+
+</aura:component>

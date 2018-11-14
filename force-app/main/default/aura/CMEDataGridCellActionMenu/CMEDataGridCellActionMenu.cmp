@@ -1,0 +1,16 @@
+<aura:component extends="c:CMEDataGridCellActionBase" implements="c:CMEDataGridCellInterface">
+
+	<td role="gridcell" class="{!'slds-truncate ' + v.data.config.CellClass}">
+		<lightning:buttonMenu iconName="{!v.data.config.IconName || v.defaultActionMenuIcon}" menuAlignment="{!v.data.config.MenuAlignment || 'left'}" onselect="{!c.onActionMenuSelected}" class="cme-actionmenu">
+			<aura:iteration items="{!v.data.config.ActionList}" var="action" indexVar="idx">
+				<lightning:menuItem value="{!action.Name}" 
+									class="{!'slds-button cme-actionmenu-item ' + action.ButtonClass}"
+									iconName="{!action.IconName}"
+									disabled="{!action.Validation.Disabled}"
+									title="{! if(action.Validation.Disabled, action.Validation.Message, action.Title)}"
+									label="{!action.Label}"
+										/>
+			</aura:iteration>
+		</lightning:buttonMenu>
+	</td>
+</aura:component>

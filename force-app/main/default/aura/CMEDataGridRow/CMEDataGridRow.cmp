@@ -3,22 +3,33 @@
     <aura:attribute name="data" type="Object"/>
     <aura:attribute name="selectAll" type="Boolean" />
 	<aura:attribute name="isSFOne" type="Boolean" default="false"/>
+    <aura:attribute name="showNotSelectableIcon" type="Boolean" default="true" />
 
+	<aura:attribute name="cells" type="Aura.Component[]" access="private" />
+	<aura:attribute name="typeMap" type="Map" access="private" description="Maps a grid column type to a lightning component" default="{
+		ActionMenu: {cmp: 'c:CMEDataGridCellActionMenu'},
+		ActionGroup: {cmp: 'c:CMEDataGridCellActionGroup', auraid: 'actionGroup'},
+		ActionText: {cmp: 'c:CMEDataGridCellActionText'},
+		BooleanIcon: {cmp: 'c:CMEDataGridCellBooleanIcon'},
+		Checkbox: {cmp: 'c:CMEDataGridCellCheckbox'},
+		Currency: {cmp: 'c:CMEDataGridCellCurrency'},
+		Datetime: {cmp: 'c:CMEDataGridCellDateTime'},
+		SObjectLink: {cmp: 'c:CMEDataGridCellSObjectLink'},
+		default: {cmp: 'c:CMEDataGridCell'}
+	}"/>
+
+	<aura:handler name="init" value="{!this}" action="{!c.onInit}"/>
     <aura:handler name="rowSelected" event="c:CMEDataGridRowSelected" action="{!c.handleRowSelected}"/>
     <aura:handler name="ActionFired" event="c:CMEDataGridActionFired" action="{!c.actionFired}"/>
 
+	<aura:method name="resetToggleActions" action="{!c.onResetToggleActions}">
+		<aura:attribute name="sourceCmp" type="String"/>
+	</aura:method>
 
     <tr aura:id="tablerow" class="{!if(v.data.cmeselected, 'slds-is-selected','')}" >
-                        
-        <aura:if isTrue="{!v.selectAll}">
-            <c:CMEDataGridCell selectAll="true" data="{!v.data}" isSFOne="{!v.isSFOne}" />
-        </aura:if>
 
-        <aura:iteration items="{!v.data.cmeoutputlist}" var="d">
-			<aura:if isTrue="{!d.visible}">
-				<c:CMEDataGridCell data="{!d}" isSFOne="{!v.isSFOne}"/>
-			</aura:if>
-        </aura:iteration>
+		{!v.cells}
+
     </tr>
 
 </aura:component>
