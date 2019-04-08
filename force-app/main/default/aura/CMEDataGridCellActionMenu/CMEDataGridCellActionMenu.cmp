@@ -1,6 +1,8 @@
 <aura:component extends="c:CMEDataGridCellActionBase" implements="c:CMEDataGridCellInterface">
 
-	<td role="gridcell" class="{!'slds-truncate ' + v.data.config.CellClass}">
+	<aura:attribute name="defaultActionMenuIcon" type="String" default="" />
+
+	<td role="gridcell" class="{!'slds-truncate td-actionmenu' + v.data.config.CellClass}">
 		<lightning:buttonMenu iconName="{!v.data.config.IconName || v.defaultActionMenuIcon}" menuAlignment="{!v.data.config.MenuAlignment || 'left'}" onselect="{!c.onActionMenuSelected}" class="cme-actionmenu">
 			<aura:iteration items="{!v.data.config.ActionList}" var="action" indexVar="idx">
 				<lightning:menuItem value="{!action.Name}" 

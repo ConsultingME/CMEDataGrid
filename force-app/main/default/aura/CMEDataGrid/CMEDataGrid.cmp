@@ -56,7 +56,7 @@
 
     <aura:attribute name="internaldatarows" type="List" access="private"/>
 	<aura:attribute name="displayedrows" type="List" access="private"/>
-	<aura:attribute name="pagedrows" type="List" default="[]" access="private"/>
+	<aura:attribute name="pagedrows" type="List" default="[]"/> <!-- access="private"-->
 	<aura:attribute name="pages" type="List" access="private"/>
 	<aura:attribute name="finalIndex" type="Integer" default="{! add((v.pageSize * v.currentpage), (v.pagedrows.length || v.pageSize))}" access="private" />
 	<aura:attribute name="internalcolumns" type="List" access="private"/>
@@ -228,30 +228,46 @@
 
                             <aura:if isTrue="{!v.filterLocationSet eq false}">
                                 <div class="{! 'cme-datagrid-filter-container' + ' ' + v.filterContainerClass}">
-                                    <div class="slds-grid slds-grid--vertical-align-center">
-                                        <aura:if isTrue="{!v.displayIcon}">
-                                            <div>
-                                                <lightning:icon iconName="{!v.filterIconName}" size="medium" />
+
+                                    <lightning:layout verticalAlign="center">
+
+                                        <lightning:layoutItem>
+                                            <aura:if isTrue="{!v.displayIcon}">
+                                                <div class="slds-m-right_x-small">
+                                                    <lightning:icon iconName="{!v.filterIconName}" size="medium" />
+                                                </div>
+                                            </aura:if>
+                                        </lightning:layoutItem>
+
+                                        <lightning:layoutItem>
+                                            <div class="{! if( empty(v.rightHeaderContent), 'slds-hide', 'slds-m-right_x-small')}">
+                                                {!v.rightHeaderContent}
                                             </div>
-                                        </aura:if>
-                                        <div class="slds-grid cme-header-filters">
-                                            <aura:iteration items="{!v.filterHeaderList.visible}" var="filter">
-                                                <c:CMEDataGridHeaderFilter filter="{!filter}"/>
-                                            </aura:iteration>
+                                        </lightning:layoutItem>
+
+                                        <lightning:layoutItem>
                                             <div class="{! if(v.filterHeaderList.other.length eq 0, 'slds-hide', '')}">
-                                                <span onclick="{!c.onFilterToggleClick}">Other Filters:</span>
+                                                <!--<span onclick="{!c.onFilterToggleClick}">Other Filters:</span>-->
                                                 <div class="{! if(!v.filtersOpen, 'slds-hide', '')}">
                                                     <aura:iteration items="{!v.filterHeaderList.other}" var="filter">
                                                         <c:CMEDataGridHeaderFilter filter="{!filter}"/>
                                                     </aura:iteration>
                                                 </div>
                                             </div>
-                                            {!v.rightHeaderContent}
-                                        </div>
-                                        <div class="slds-col_bump-left">
+                                        </lightning:layoutItem>
+
+                                        <lightning:layoutItem class="slds-m-right_x-small">
+                                            <aura:iteration items="{!v.filterHeaderList.visible}" var="filter">
+                                                <c:CMEDataGridHeaderFilter filter="{!filter}"/>
+                                            </aura:iteration>
+                                        </lightning:layoutItem>
+
+                                        <lightning:layoutItem alignmentBump="left">
                                             <lightning:input aura:id="filterText" type="search" label="Filter" name="filterText" onchange="{!c.onFilterByTextChange}" placeholder="{!v.filterPlaceHolder}" class="cme-datagrid-filter"/>
-                                        </div>
-                                    </div>
+                                        </lightning:layoutItem>
+
+                                    </lightning:layout>
+
                                 </div>
                             </aura:if>
                             
@@ -292,32 +308,22 @@
 
                         <!-- Paging Controls -->
 
-                        <div class="{! if(v.pages.length le 1, 'cme-datagrid-hidden', 'slds-grid slds-grid_pull-padded-medium slds-grid_vertical-align-center cme-paging')}">
+                        <div class="{! if(v.pages.length le 1, 'cme-datagrid-hidden', 'cme-paging')}">
 
-                            <div class="slds-p-horizontal_medium">
-                                <div class="slds-form slds-form_horizontal cme-pagesize">
-                                    <lightning:select aura:id="pageSizeSelect" value="{!v.pageSize}" label="Page Size:" name="pageSize">
-                                        <aura:iteration items="{!v.pageSizeOptions}" var="opt">
-                                            <option text="{!opt}" value="{!opt}"/>
-                                        </aura:iteration>
-                                    </lightning:select>
+                            <lightning:layout verticalAlign="center" multipleRows="true">
+                                <lightning:select aura:id="pageSizeSelect" value="{!v.pageSize}" label="Page Size:" name="pageSize" variant="label-hidden" class="paging-select-label slds-m-top_small slds-m-right_small">
+                                    <aura:iteration items="{!v.pageSizeOptions}" var="opt">
+                                        <option text="{!opt}" value="{!opt}"/>
+                                    </aura:iteration>
+                                </lightning:select>
+                                <lightning:button onclick="{!c.onFirstPage}" disabled="{! v.currentpage == 0}" class="cme-paging-buttons slds-m-top_small">&lt;&lt;</lightning:button>
+                                <lightning:button onclick="{!c.onPreviousPage}" disabled="{! v.currentpage == 0}" class="cme-paging-buttons slds-m-top_small">&lt;</lightning:button>
+                                <lightning:button onclick="{!c.onNextPage}" disabled="{! v.currentpage == v.pages.length-1}" class="cme-paging-buttons slds-m-top_small">&gt;</lightning:button>
+                                <lightning:button onclick="{!c.onLastPage}" disabled="{! v.currentpage == v.pages.length-1}" class="cme-paging-buttons slds-m-top_small">&gt;&gt;</lightning:button>
+                                <div class="slds-p-horizontal_medium slds-m-top_small">
+                                    Showing {! (v.pageSize * v.currentpage)+1} to {!if(v.finalIndex gt v.displayedrows.length, v.displayedrows.length, v.finalIndex)} of {!v.displayedrows.length} entries
                                 </div>
-                            </div>
-                            <div class="">
-                                <lightning:button onclick="{!c.onFirstPage}" disabled="{! v.currentpage == 0}" class="cme-paging-buttons">&lt;&lt;</lightning:button>
-                            </div>
-                            <div class="">
-                                <lightning:button onclick="{!c.onPreviousPage}" disabled="{! v.currentpage == 0}" class="cme-paging-buttons">&lt;</lightning:button>
-                            </div>
-                            <div class="">
-                                <lightning:button onclick="{!c.onNextPage}" disabled="{! v.currentpage == v.pages.length-1}" class="cme-paging-buttons">&gt;</lightning:button>
-                            </div>
-                            <div class="">
-                                <lightning:button onclick="{!c.onLastPage}" disabled="{! v.currentpage == v.pages.length-1}" class="cme-paging-buttons">&gt;&gt;</lightning:button>
-                            </div>
-                            <div class="slds-p-horizontal_medium">
-                                Showing {! (v.pageSize * v.currentpage)+1} to {!if(v.finalIndex gt v.displayedrows.length, v.displayedrows.length, v.finalIndex)} of {!v.displayedrows.length} entries
-                            </div>
+                            </lightning:layout>
                         </div>
 
                         <!-- Paging Controls End -->

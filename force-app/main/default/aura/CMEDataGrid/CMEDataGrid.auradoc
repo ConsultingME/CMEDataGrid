@@ -40,7 +40,7 @@
             <tr><th>DefaultLabel/TrueLabel/FalseLabel</th><td>Used with the Checkbox type to customize the string values in the column filter</td></tr>
             <tr><th>IncludeInTextFilter</th><td>Set to true to include the column in the global text filter</td></tr>
             <tr><th>ButtonClass</th><td>Used with ActionGroup to set a custom style on the buttons</td></tr>
-            <tr><th>CellClass</th><td>Used to set a custom style on the header (th) and cell (td)</td></tr>
+            <tr><th>CellClass</th><td>Used to set a custom style on the header (th) and cell (td). Use tablet-col-hide and mobile-col-hide to hide a column on a phone or tablet.</td></tr>
             <tr><th>ActionText</th><td>A single action rendered as a hyperlink</td></tr>
             <tr><th>ActionName</th><td>Used with type ActionText. A <strong>c:CMEDataGridActionFired</strong> event is fired when an action is triggered. Properties of the Action are: <ul><li>Label: text displayed on the button</li><li>Name: identifier included in the Action Fired event to indicate which action was triggered</li></ul></td></tr>
             <tr><th>ActionList</th><td>Defines list of actions to display in the grid. A <strong>c:CMEDataGridActionFired</strong> event is fired when an action is triggered. Properties of each Action include: 

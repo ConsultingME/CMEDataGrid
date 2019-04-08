@@ -401,7 +401,7 @@
 		component.set("v.movetopage", 0);
 		try {
 			component.set("v.pagedrows", pagedrows);
-		} catch (e) { /*buttonIcon throws exception, just eat it */}
+		} catch (e) { console.log(e); /*buttonIcon throws exception, just eat it */}
 	},
 
 	setPaging: function(component, helper) {

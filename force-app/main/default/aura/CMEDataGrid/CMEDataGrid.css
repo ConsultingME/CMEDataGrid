@@ -19,18 +19,6 @@
 	width: 200px;
 }
 
-.THIS .cme-pagesize .slds-form-element label {
-	font-size: .8125rem
-}
-
-.THIS .cme-pagesize label {
-	margin-top: 5px;
-}
-
-.THIS .cme-paging {
-	margin-top: 10px;
-}
-
 .THIS .cme-paging-buttons {
 	margin-right: 4px;
 }
@@ -52,7 +40,7 @@
 }
 
 .THIS .cme-datagrid-container {
-    overflow: hidden;
+    
 }
 
 .THIS .cme-datagrid-filter {
@@ -64,8 +52,7 @@
 }
 
 .THIS .cme-datagrid-filter-container {
-    padding: 0 0 0.5rem 0;
-    margin-top: 2px;
+    padding: 0.5rem 0;
 }
 
 .THIS .cme-datagrid-filter-tagline {
@@ -136,4 +123,27 @@
 
 .THIS .filter-pillContainer li {
     padding: 0 0 .25rem .25rem
+}
+
+.THIS .td-actionmenu {
+    overflow: visible !important;
+}
+
+.THIS .paging-select-label label {
+    display: none;
+}
+
+
+@media (max-width: 64em) {
+
+    .THIS .tablet-col-hide {
+        display: none;
+    }
+}
+
+@media (max-width: 47.9375em) {
+
+    .THIS .mobile-col-hide {
+        display: none;
+    }
 }
